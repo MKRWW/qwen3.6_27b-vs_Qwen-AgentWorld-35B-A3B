@@ -1,0 +1,16 @@
+{
+  "domain": "terminal",
+  "_note": "BEISPIEL-Triple. truth wurde von Hand gesetzt und MUSS vor echten Laeufen via scripts/gen_triples.py real generiert werden (siehe tasks/README.md).",
+  "history": [
+    { "action": "mkdir demo && cd demo", "observation": "" },
+    { "action": "printf 'hello\\n' > a.txt", "observation": "" }
+  ],
+  "action": "cat a.txt && ls -1 && echo exit=$?",
+  "truth": {
+    "stdout": "hello\na.txt\nexit=0",
+    "stderr": "",
+    "exit_code": 0,
+    "fs_delta": ["a.txt"]
+  },
+  "format_schema": null
+}

@@ -1,0 +1,5 @@
+{
+  "domain": "swe",
+  "prompt": "In utils.py liefert sum_range(n) ein um 1 zu kleines Ergebnis (es summiert 1..n-1 statt 1..n). Behebe den Bug in utils.py. Die Tests in test_utils.py muessen anschliessend gruen sein. Aendere nur den Produktivcode, nicht die Tests.",
+  "_meta": { "author": "markus", "created": "2026-06-25", "difficulty": "easy", "kind": "bugfix" }
+}

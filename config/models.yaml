@@ -1,0 +1,40 @@
+# Modelle unter Test. Endpoints + Sampling. Secrets kommen aus .env (nicht hier).
+# Die model_id von B wird von scripts/probe_endpoints.sh ausgelesen -> hier eintragen.
+
+models:
+  A:
+    name: Qwen3.6-27b
+    endpoint: http://192.168.178.21:8000/v1
+    model_id: qwen3.6-27b
+    api_key_env: QWEN_API_KEY        # vLLM lokal akzeptiert oft beliebigen Key
+    quant: int4-autoround
+    notes: LAN, vLLM, qwen3-tool-parser aktiv, max_model_len=262144
+
+  B:
+    name: AgentWorld-35B-A3B
+    endpoint: http://194.228.55.129:37773/v1
+    model_id: TODO_FROM_PROBE        # via probe_endpoints.sh füllen
+    api_key_env: AGENTWORLD_API_KEY  # Bearer = $OPEN_BUTTON_TOKEN/$WEB_PASSWORD
+    quant: bf16
+    notes: vast.ai remote, MoE 35B/3B-aktiv, Tool-Parser UNBEKANNT
+
+# Sampling-Regime (siehe docs/METHODOLOGY.md §1)
+sampling_regimes:
+  greedy:
+    temperature: 0.0
+    top_p: 1.0
+    seed: 7
+  card:
+    temperature: 0.6
+    top_p: 0.95
+    top_k: 20
+    seed: 7
+
+max_tokens:
+  track1_policy: 2048
+  track2_worldmodel: 1024
+
+judge:
+  # Self-Judging vermeiden: B wird nie von B gejudged.
+  default: A          # lokaler Qwen-Judge
+  alt: claude         # optionale Gegenprobe (separater Lauf)

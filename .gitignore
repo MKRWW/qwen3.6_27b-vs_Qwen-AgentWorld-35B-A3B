@@ -1,0 +1,20 @@
+# Secrets
+.env
+
+# Raw run logs (groß; nur aggregierte Summaries werden committet)
+results/raw/
+*.jsonl
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+*.egg-info/
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

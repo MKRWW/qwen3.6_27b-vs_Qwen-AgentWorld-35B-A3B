@@ -1,0 +1,7 @@
+[
+  "mkdir demo && cd demo 2>/dev/null; echo ok",
+  "printf 'hello\\nworld\\n' > a.txt && wc -l a.txt",
+  "grep world a.txt",
+  "rm a.txt && ls -1A",
+  "python3 -c 'print(2**10)'"
+]

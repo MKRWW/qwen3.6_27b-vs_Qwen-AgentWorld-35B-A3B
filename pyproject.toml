@@ -1,0 +1,15 @@
+[project]
+name = "agentworld-vs-qwen36-bench"
+version = "0.1.0"
+description = "Reproduzierbarer Benchmark: Qwen-AgentWorld-35B-A3B vs Qwen3.6-27b (Policy- + World-Model-Tracks)"
+requires-python = ">=3.10"
+dependencies = [
+    "openai>=1.40",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[tool.pytest.ini_options]
+addopts = "-q"
