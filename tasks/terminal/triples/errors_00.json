@@ -1,0 +1,13 @@
+{
+  "domain": "terminal",
+  "history": [],
+  "action": "cat /nonexistent_file_xyz",
+  "truth": {
+    "stdout": "",
+    "stderr": "cat: /nonexistent_file_xyz: No such file or directory",
+    "exit_code": 1,
+    "cwd": "/tmp/tmp.tUXD8PgcKr",
+    "fs_delta": []
+  },
+  "format_schema": null
+}

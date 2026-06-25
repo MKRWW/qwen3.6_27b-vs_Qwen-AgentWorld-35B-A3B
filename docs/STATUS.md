@@ -72,3 +72,18 @@ reale Friktion gegen „alle Agenten laufen besser". Siehe [FINDINGS.md](FINDING
 ### Hinweis zur Interpretation
 Latenz/Speed wird **nicht** verglichen (verschiedene GPUs/Netz). Stichproben sind
 klein → Richtungs-Indikatoren, keine Signifikanz. Siehe THREATS.md.
+
+## 2026-06-25 (Forts. 2) — B auf 256k, erster harter Track-2-Lauf
+
+- vast-Claude bestätigt: 32k war nur **Template-Default** (VLLM_ARGS), nicht VRAM.
+  Hybrid-Arch (30 Linear- + 10 Full-Attn-Layer) → KV-Cache winzig; max-model-len
+  höher kostet 0 VRAM. **Auf 262144 (256k) gesetzt.** Asymmetrie weg.
+- Grader v2 (difflib-Ähnlichkeit, stderr, gewichtet), gen_triples `--prefix`,
+  5 harte Sequenzen → **26 Triples** (Fehler/Traceback/Python/Textproc/git/stateful).
+- **Track-2-Lauf (greedy, Judge an):** Factuality **A=82.5 vs B=81.6 → Gleichstand**.
+  Head-to-head 2:1:23. AgentWorld auf seiner Kern-Aufgabe **nicht** besser.
+- Judge unbrauchbar hier (JSON-Artefakt + unkalibrierte Cross-Judges) → Prompt
+  gefixt, Realism/Quality bis neutraler Judge ausgesetzt. Details: FINDINGS.md.
+
+### Noch offen
+- [ ] card-Regime; neutraler Judge (Claude); SWE-Triples; N≥100; härtere Track-1-Tasks.

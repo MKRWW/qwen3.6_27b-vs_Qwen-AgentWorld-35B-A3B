@@ -1,0 +1,22 @@
+{
+  "domain": "terminal",
+  "history": [
+    {
+      "action": "printf 'banana\\napple\\ncherry\\napple\\nbanana\\napple\\n' > fruits.txt && wc -l fruits.txt",
+      "observation": "6 fruits.txt"
+    },
+    {
+      "action": "sort fruits.txt | uniq -c | sort -rn",
+      "observation": "      3 apple\n      2 banana\n      1 cherry"
+    }
+  ],
+  "action": "grep -c apple fruits.txt",
+  "truth": {
+    "stdout": "3",
+    "stderr": "",
+    "exit_code": 0,
+    "cwd": "/tmp/tmp.vTgtN9mNS8",
+    "fs_delta": []
+  },
+  "format_schema": null
+}

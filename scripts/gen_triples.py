@@ -53,6 +53,7 @@ def main():
     ap.add_argument("--seq", required=True, help="JSON-Liste von Shell-Befehlen")
     ap.add_argument("--domain", default="terminal")
     ap.add_argument("--out", required=True)
+    ap.add_argument("--prefix", default="seq", help="Dateinamen-Prefix (kollisionsfrei bei mehreren Sequenzen)")
     args = ap.parse_args()
 
     with open(args.seq, encoding="utf-8") as f:
@@ -94,7 +95,7 @@ def main():
                       "fs_delta": s["fs_delta"]},
             "format_schema": None,
         }
-        out_path = os.path.join(args.out, f"seq_{i:02d}.json")
+        out_path = os.path.join(args.out, f"{args.prefix}_{i:02d}.json")
         with open(out_path, "w", encoding="utf-8") as f:
             json.dump(triple, f, ensure_ascii=False, indent=2)
         print(f"  -> seq_{i:02d}.json  exit={s['exit_code']} cwd={s['cwd']} "

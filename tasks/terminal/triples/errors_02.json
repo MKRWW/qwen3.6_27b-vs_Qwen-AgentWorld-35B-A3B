@@ -1,0 +1,22 @@
+{
+  "domain": "terminal",
+  "history": [
+    {
+      "action": "cat /nonexistent_file_xyz",
+      "observation": ""
+    },
+    {
+      "action": "false; echo exit=$?",
+      "observation": "exit=1"
+    }
+  ],
+  "action": "python3 -c 'print(1/0)'",
+  "truth": {
+    "stdout": "",
+    "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\nZeroDivisionError: division by zero",
+    "exit_code": 1,
+    "cwd": "/tmp/tmp.tUXD8PgcKr",
+    "fs_delta": []
+  },
+  "format_schema": null
+}

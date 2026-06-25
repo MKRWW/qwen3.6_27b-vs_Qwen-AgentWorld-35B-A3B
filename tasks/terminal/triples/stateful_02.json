@@ -1,0 +1,24 @@
+{
+  "domain": "terminal",
+  "history": [
+    {
+      "action": "mkdir -p proj/src && cd proj && basename $(pwd)",
+      "observation": "proj"
+    },
+    {
+      "action": "printf 'print(40 + 2)\\n' > src/app.py && ls -R",
+      "observation": ".:\nsrc\n\n./src:\napp.py"
+    }
+  ],
+  "action": "cd src && python3 app.py",
+  "truth": {
+    "stdout": "42",
+    "stderr": "",
+    "exit_code": 0,
+    "cwd": "/tmp/tmp.qSn3EqRxuX/proj/src",
+    "fs_delta": [
+      "app.py"
+    ]
+  },
+  "format_schema": null
+}

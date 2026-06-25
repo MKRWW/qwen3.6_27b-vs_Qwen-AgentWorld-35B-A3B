@@ -1,0 +1,15 @@
+{
+  "domain": "terminal",
+  "history": [],
+  "action": "printf 'banana\\napple\\ncherry\\napple\\nbanana\\napple\\n' > fruits.txt && wc -l fruits.txt",
+  "truth": {
+    "stdout": "6 fruits.txt",
+    "stderr": "",
+    "exit_code": 0,
+    "cwd": "/tmp/tmp.vTgtN9mNS8",
+    "fs_delta": [
+      "fruits.txt"
+    ]
+  },
+  "format_schema": null
+}

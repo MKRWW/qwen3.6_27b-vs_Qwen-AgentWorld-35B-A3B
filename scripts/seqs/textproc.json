@@ -1,0 +1,7 @@
+[
+  "printf 'banana\\napple\\ncherry\\napple\\nbanana\\napple\\n' > fruits.txt && wc -l fruits.txt",
+  "sort fruits.txt | uniq -c | sort -rn",
+  "grep -c apple fruits.txt",
+  "awk '{print NR\": \"$0}' fruits.txt",
+  "sed -n '2,4p' fruits.txt"
+]

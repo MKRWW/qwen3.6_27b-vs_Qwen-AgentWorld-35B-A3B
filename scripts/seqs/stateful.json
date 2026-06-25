@@ -1,0 +1,7 @@
+[
+  "mkdir -p proj/src && cd proj && basename $(pwd)",
+  "printf 'print(40 + 2)\\n' > src/app.py && ls -R",
+  "cd src && python3 app.py",
+  "cd .. && find . -name '*.py'",
+  "export GREETING=hallo && echo $GREETING-welt"
+]

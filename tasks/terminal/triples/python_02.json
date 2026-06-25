@@ -1,0 +1,25 @@
+{
+  "domain": "terminal",
+  "history": [
+    {
+      "action": "python3 -c 'print(sum(range(11)))'",
+      "observation": "55"
+    },
+    {
+      "action": "python3 -c 'import json; print(json.dumps({\"a\": 1, \"b\": [2, 3]}))'",
+      "observation": "{\"a\": 1, \"b\": [2, 3]}"
+    }
+  ],
+  "action": "printf 'def sq(x):\\n    return x*x\\n' > m.py && python3 -c 'import m; print(m.sq(7))'",
+  "truth": {
+    "stdout": "49",
+    "stderr": "",
+    "exit_code": 0,
+    "cwd": "/tmp/tmp.Ow9ZoLOZ1Z",
+    "fs_delta": [
+      "__pycache__",
+      "m.py"
+    ]
+  },
+  "format_schema": null
+}

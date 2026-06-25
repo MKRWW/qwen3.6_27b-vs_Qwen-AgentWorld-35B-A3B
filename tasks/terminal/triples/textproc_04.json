@@ -1,0 +1,30 @@
+{
+  "domain": "terminal",
+  "history": [
+    {
+      "action": "printf 'banana\\napple\\ncherry\\napple\\nbanana\\napple\\n' > fruits.txt && wc -l fruits.txt",
+      "observation": "6 fruits.txt"
+    },
+    {
+      "action": "sort fruits.txt | uniq -c | sort -rn",
+      "observation": "      3 apple\n      2 banana\n      1 cherry"
+    },
+    {
+      "action": "grep -c apple fruits.txt",
+      "observation": "3"
+    },
+    {
+      "action": "awk '{print NR\": \"$0}' fruits.txt",
+      "observation": "1: banana\n2: apple\n3: cherry\n4: apple\n5: banana\n6: apple"
+    }
+  ],
+  "action": "sed -n '2,4p' fruits.txt",
+  "truth": {
+    "stdout": "apple\ncherry\napple",
+    "stderr": "",
+    "exit_code": 0,
+    "cwd": "/tmp/tmp.vTgtN9mNS8",
+    "fs_delta": []
+  },
+  "format_schema": null
+}

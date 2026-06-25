@@ -1,0 +1,15 @@
+{
+  "domain": "terminal",
+  "history": [],
+  "action": "git init -q && git config user.email a@b.c && git config user.name Tester && echo initialized",
+  "truth": {
+    "stdout": "initialized",
+    "stderr": "",
+    "exit_code": 0,
+    "cwd": "/tmp/tmp.OL89AosIDl",
+    "fs_delta": [
+      ".git"
+    ]
+  },
+  "format_schema": null
+}

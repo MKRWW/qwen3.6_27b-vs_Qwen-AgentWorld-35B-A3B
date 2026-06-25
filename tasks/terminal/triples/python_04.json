@@ -1,0 +1,32 @@
+{
+  "domain": "terminal",
+  "history": [
+    {
+      "action": "python3 -c 'print(sum(range(11)))'",
+      "observation": "55"
+    },
+    {
+      "action": "python3 -c 'import json; print(json.dumps({\"a\": 1, \"b\": [2, 3]}))'",
+      "observation": "{\"a\": 1, \"b\": [2, 3]}"
+    },
+    {
+      "action": "printf 'def sq(x):\\n    return x*x\\n' > m.py && python3 -c 'import m; print(m.sq(7))'",
+      "observation": "49"
+    },
+    {
+      "action": "python3 -c 'x = [1, 2, 3]; print(x[5])'",
+      "observation": ""
+    }
+  ],
+  "action": "printf 'a,b\\n1,2\\n3,4\\n' > d.csv && python3 -c 'import csv; print(sum(int(r[0]) for r in list(csv.reader(open(\"d.csv\")))[1:]))'",
+  "truth": {
+    "stdout": "4",
+    "stderr": "",
+    "exit_code": 0,
+    "cwd": "/tmp/tmp.Ow9ZoLOZ1Z",
+    "fs_delta": [
+      "d.csv"
+    ]
+  },
+  "format_schema": null
+}

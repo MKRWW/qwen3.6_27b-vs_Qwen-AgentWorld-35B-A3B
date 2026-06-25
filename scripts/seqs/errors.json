@@ -1,0 +1,8 @@
+[
+  "cat /nonexistent_file_xyz",
+  "false; echo exit=$?",
+  "python3 -c 'print(1/0)'",
+  "grep needle /etc/hostname; echo rc=$?",
+  "ls -1 /root/private_xyz; echo rc=$?",
+  "bash -c 'exit 42'; echo code=$?"
+]

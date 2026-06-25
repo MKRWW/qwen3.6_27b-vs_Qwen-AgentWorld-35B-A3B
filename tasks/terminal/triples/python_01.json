@@ -1,0 +1,18 @@
+{
+  "domain": "terminal",
+  "history": [
+    {
+      "action": "python3 -c 'print(sum(range(11)))'",
+      "observation": "55"
+    }
+  ],
+  "action": "python3 -c 'import json; print(json.dumps({\"a\": 1, \"b\": [2, 3]}))'",
+  "truth": {
+    "stdout": "{\"a\": 1, \"b\": [2, 3]}",
+    "stderr": "",
+    "exit_code": 0,
+    "cwd": "/tmp/tmp.Ow9ZoLOZ1Z",
+    "fs_delta": []
+  },
+  "format_schema": null
+}

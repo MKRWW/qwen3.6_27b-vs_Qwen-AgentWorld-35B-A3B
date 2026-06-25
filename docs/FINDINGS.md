@@ -1,52 +1,56 @@
-# FINDINGS (Zwischenstand)
+# FINDINGS
 
-> Status: **Pipeline beider Tracks end-to-end bewiesen, Datensatz noch klein.**
-> Vor dem Zitieren von Zahlen **[THREATS.md](THREATS.md) lesen** (int4 vs NVFP4,
-> verschiedene GPUs, kleine N → Richtungs-Indikatoren, keine p-Werte).
-> Tabellen regenerierbar: `python scripts/make_report.py results/raw`.
+> Status: **Erstes belastbares Trennsignal da (Track 2, 26 harte Triples).**
+> Vor dem Zitieren **[THREATS.md](THREATS.md) lesen** (int4 vs NVFP4, kleine N,
+> nur Terminal-Domäne). Tabellen regenerierbar: `python scripts/make_report.py results/raw`.
 
-## Kernbefund bisher
+## Headline
 
-**Noch kein inhaltlicher Modell-Befund** — beide bestehen die bisherigen Trivial-Tasks.
+**Auf einer fairen, real-ausgeführten World-Model-Evaluation schlägt
+AgentWorld-35B-A3B das generische Qwen3.6-27b NICHT — auch nicht auf seiner
+eigenen Kern-Aufgabe (Next-State-Vorhersage).** Sie sind gleichauf. Der Hype
+„3× besser / alle Agenten laufen besser" ist durch diese Messungen **nicht gedeckt**.
 
-**Operative Notiz (KEIN Modell-Befund):** AgentWorld (B) brauchte vier
-hermes-Workarounds zum Starten (api_key in Config, context_length-Override ×2,
-max_tokens-Cap), Qwen3.6 (A) keinen. Ursache ist aber **reine Serving-Asymmetrie**,
-nicht das Modell: B wird auf der vast-GPU mit nur **32k** Kontext serviert (VRAM-bound,
-NVFP4 auf 1× RTX PRO 5000), A lokal mit **256k / 512k KV-Cache**. Das Model Card von B
-behauptet selbst **262k** — die 32k sind eine Hardware-/Config-Entscheidung. Wird B mit
-≥64k serviert, verschwinden die Workarounds. → **Nicht** als „Agenten laufen schlechter"
-werten; nur als Deployment-Hürde *bei dieser Serving-Config* notieren. Im Benchmark
-neutralisiert durch Paritäts-Cap (beide auf 64k/2048, s. THREATS §5c).
+## Track 2 — World-Model-Fidelity (26 harte Terminal-Triples, greedy)
 
-## Track 1 — Hype-Test (Policy / Agent), Stand
+Aufgabe: gegeben Session-Verlauf + nächster Befehl → die reale Terminal-Ausgabe
+vorhersagen. Ground truth echt in WSL ausgeführt (Tracebacks, Exit-Codes, git-Status,
+mehrzeilige Outputs, stateful cd-Ketten).
 
-| Modell | Tasks | Success | hermes-Fehler | Anmerkung |
-|--------|-------|---------|---------------|-----------|
-| A (Qwen3.6-27b) | 1 | 1/1 | 0 | Fix korrekt (`range(1,n)`→`range(1,n+1)`) |
-| B (AgentWorld)  | 1 | 1/1 | 0 | Fix korrekt, +entfernte Bug-Kommentar |
+| Metrik | A (Qwen3.6-27b) | B (AgentWorld-35B-A3B) |
+|--------|----------------|------------------------|
+| **Factuality (deterministisch, 0–100)** | **82.5** | **81.6** |
+| Format (nicht-leer/valide) | 100 | 100 |
+| Head-to-head (>3 Pkt. Diff.) | **2 Siege** | **1 Sieg** | 23× Gleichstand |
 
-→ Auf dem trivialen Bugfix bestehen **beide**. Ein einzelner einfacher Task
-diskriminiert nicht — sagt nichts über die „Code ist besser"-Behauptung. Braucht die
-härtere Suite (s.u.).
+→ **Statistischer Gleichstand.** Beide verstehen Terminal-Semantik gut. Die zwei
+echten Unterschiede heben sich nahezu auf:
+- `git diff --numstat`: **A korrekt** (`1\t0\tr.txt`), **B falsch** (`0\t0\tr.txt`).
+- `sort|uniq -c|sort -rn`: **B** trifft die Spalten-Formatierung besser als A.
 
-## Track 2 — World-Model-Fidelity, Stand
+### LLM-Judge: hier NICHT vertrauenswürdig (dokumentiert)
+Cross-Judging (A↔B) ergab für **gleiche** Factuality stark divergierende Realism-Werte
+(A bewertet durch B: 33.8; B bewertet durch A: 75.8). Das ist Judge-Identität, kein
+Modell-Unterschied. Zwei Ursachen: (1) truth wurde dem Judge als JSON gezeigt → er
+bestrafte Roh-Text-Vorhersagen fälschlich (Task verlangt aber Roh-Text); (2) A und B
+als Judges sind unkalibriert. **Nur Consistency ist brauchbar** (beide ~90). Judge-Prompt
+ist gefixt (`graders.py`); für belastbare Realism/Quality braucht es einen **neutralen,
+kalibrierten** Judge (z. B. Claude) — offen.
 
-| Modell | Triples | Factuality | Format | Judge |
-|--------|---------|-----------|--------|-------|
-| A (Qwen3.6-27b) | 5 | 43.3 | 100.0 | (aus) |
-| B (AgentWorld)  | 5 | 43.3 | 100.0 | (aus) |
+## Track 1 — Hype-Test (Policy/Agent), Stand
+Beide lösen den SWE-Bugfix (pytest grün). Trivial-Task → diskriminiert nicht; härtere
+Agent-Suite steht noch aus. Operative Notiz: B's 32k war Serving-Default (Template),
+inzwischen auf 256k korrigiert → kein Modell-Befund (s. THREATS §5c).
 
-→ Auf 5 Trivial-Terminal-Triples **identisch**. Grader noch grob, LLM-Judge noch aus.
-Hier *sollte* B glänzen, wenn der Hype einen Kern hat — zeigt sich erst mit härteren
-Triples + Grader v2 + Judge.
+## Was damit gezeigt ist — und was nicht
+**Gezeigt:** Auf 26 fairen, reproduzierbaren Terminal-Next-State-Aufgaben kein Vorteil
+für AgentWorld. Das ist genau die Domäne, in der es laut Card glänzen soll.
+**Nicht gezeigt:** Verhalten in den anderen 6 Domänen (Search/SWE/Android/Web/OS/MCP),
+bei sehr langen/komplexen Szenarien, oder mit unquantisierten Gewichten. N=26, eine
+Domäne, ein Sampling-Regime → **Richtungs-Indikator, kein Endurteil.**
 
-## Was damit NICHT gezeigt ist
-- Ob B bei *schwierigen* Agent-Tasks besser/schlechter ist (Suite zu klein).
-- Ob B als World Model wirklich überlegen ist (Track 2 noch nicht ausgereizt).
-- Irgendeine Aussage zu Speed (bewusst nicht verglichen, s. THREATS).
-
-## Nächste Schritte für belastbare Zahlen
-1. Diskriminierende Task-/Triple-Suite (Fehlerfälle, git/pip/pytest, mehrstufig).
-2. Grader v2 + LLM-Judge (Cross-Judging A↔B, optional Claude).
-3. `card`-Sampling-Regime gegenlaufen.
+## Nächste Schritte für mehr Konfidenz
+1. `card`-Sampling-Regime gegenlaufen (temp 0.6/0.95/20) — Varianz prüfen.
+2. Neutraler Judge (Claude) statt Cross-Judging → Realism/Quality belastbar.
+3. SWE-Domänen-Triples (pytest-Output vorhersagen) + härtere Agent-Tasks (Track 1).
+4. Triple-Zahl hoch (≥100) für tragfähigere Mittelwerte.

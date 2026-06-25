@@ -1,0 +1,30 @@
+{
+  "domain": "terminal",
+  "history": [
+    {
+      "action": "mkdir -p proj/src && cd proj && basename $(pwd)",
+      "observation": "proj"
+    },
+    {
+      "action": "printf 'print(40 + 2)\\n' > src/app.py && ls -R",
+      "observation": ".:\nsrc\n\n./src:\napp.py"
+    },
+    {
+      "action": "cd src && python3 app.py",
+      "observation": "42"
+    },
+    {
+      "action": "cd .. && find . -name '*.py'",
+      "observation": "./src/app.py"
+    }
+  ],
+  "action": "export GREETING=hallo && echo $GREETING-welt",
+  "truth": {
+    "stdout": "hallo-welt",
+    "stderr": "",
+    "exit_code": 0,
+    "cwd": "/tmp/tmp.qSn3EqRxuX/proj",
+    "fs_delta": []
+  },
+  "format_schema": null
+}

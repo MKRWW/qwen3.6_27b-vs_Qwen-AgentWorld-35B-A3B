@@ -1,0 +1,34 @@
+{
+  "domain": "terminal",
+  "history": [
+    {
+      "action": "cat /nonexistent_file_xyz",
+      "observation": ""
+    },
+    {
+      "action": "false; echo exit=$?",
+      "observation": "exit=1"
+    },
+    {
+      "action": "python3 -c 'print(1/0)'",
+      "observation": ""
+    },
+    {
+      "action": "grep needle /etc/hostname; echo rc=$?",
+      "observation": "rc=1"
+    },
+    {
+      "action": "ls -1 /root/private_xyz; echo rc=$?",
+      "observation": "rc=2"
+    }
+  ],
+  "action": "bash -c 'exit 42'; echo code=$?",
+  "truth": {
+    "stdout": "code=42",
+    "stderr": "",
+    "exit_code": 0,
+    "cwd": "/tmp/tmp.tUXD8PgcKr",
+    "fs_delta": []
+  },
+  "format_schema": null
+}

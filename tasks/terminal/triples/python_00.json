@@ -1,12 +1,12 @@
 {
   "domain": "terminal",
   "history": [],
-  "action": "mkdir demo && cd demo 2>/dev/null; echo ok",
+  "action": "python3 -c 'print(sum(range(11)))'",
   "truth": {
-    "stdout": "ok",
+    "stdout": "55",
     "stderr": "",
     "exit_code": 0,
-    "cwd": "/tmp/tmp.Pc9JgBkece/demo",
+    "cwd": "/tmp/tmp.Ow9ZoLOZ1Z",
     "fs_delta": []
   },
   "format_schema": null

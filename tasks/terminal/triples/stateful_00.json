@@ -1,0 +1,15 @@
+{
+  "domain": "terminal",
+  "history": [],
+  "action": "mkdir -p proj/src && cd proj && basename $(pwd)",
+  "truth": {
+    "stdout": "proj",
+    "stderr": "",
+    "exit_code": 0,
+    "cwd": "/tmp/tmp.qSn3EqRxuX/proj",
+    "fs_delta": [
+      "src"
+    ]
+  },
+  "format_schema": null
+}

@@ -1,0 +1,20 @@
+{
+  "domain": "terminal",
+  "history": [
+    {
+      "action": "git init -q && git config user.email a@b.c && git config user.name Tester && echo initialized",
+      "observation": "initialized"
+    }
+  ],
+  "action": "echo hello > r.txt && git add r.txt && git status --short",
+  "truth": {
+    "stdout": "A  r.txt",
+    "stderr": "",
+    "exit_code": 0,
+    "cwd": "/tmp/tmp.OL89AosIDl",
+    "fs_delta": [
+      "r.txt"
+    ]
+  },
+  "format_schema": null
+}
