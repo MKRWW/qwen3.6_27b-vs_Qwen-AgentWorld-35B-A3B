@@ -36,6 +36,17 @@ Hier ist offen, was die Ergebnisse verzerrt.
 - B serviert nur 32k Kontext, A 262k. Beide Prompts werden auf **32k** begrenzt,
   damit kein Modell durch mehr/weniger Kontextfenster bevor-/benachteiligt wird.
 
+## 5c. Serving-Asymmetrie (NICHT dem Modell anlasten)
+- **A wird mit 256k Kontext / 512k KV-Cache serviert, B mit nur 32k.** Das ist eine
+  reine Deployment-/VRAM-Entscheidung (B = NVFP4 auf 1× RTX PRO 5000, eng), **kein**
+  Modell-Merkmal — B's Card behauptet selbst 262k.
+- Folge fürs Setup: B braucht hermes-Overrides (context_length=64000, max_tokens=2048)
+  zum Starten, A nicht. **Das ist Serving-Friktion, kein Agent-Qualitäts-Befund** und
+  darf nicht als „B ist schlechter" gewertet werden.
+- Neutralisierung im Benchmark: Track-1-Parität deckelt **beide** auf context_length
+  64000 / max_tokens 2048 (gemeinsames unteres Fenster). A nutzt seine 256k im Run
+  nicht. Wenn B künftig mit ≥64k serviert wird, Overrides entfernen und neu fahren.
+
 ## 6. Reasoning-Budget / leerer Content
 - Beide sind Reasoning-Modelle. Zu kleines `max_tokens` → Budget im Denk-Teil
   aufgebraucht → leerer `content`. Wir setzen großzügige Limits und loggen

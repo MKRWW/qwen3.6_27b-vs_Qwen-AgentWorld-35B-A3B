@@ -5,14 +5,19 @@
 > verschiedene GPUs, kleine N → Richtungs-Indikatoren, keine p-Werte).
 > Tabellen regenerierbar: `python scripts/make_report.py results/raw`.
 
-## Kernbefund bisher (qualitativ, robust)
+## Kernbefund bisher
 
-**Der Hype „alle Agenten laufen besser" hält der Praxis nicht stand — schon beim
-Aufsetzen.** Qwen3.6 (A) lief im Agent-Harness hermes **ohne jeden Eingriff**.
-AgentWorld (B) brauchte **vier** Workarounds, im Kern weil sein **32k-Serving-Kontext
-unter hermes' 64k-Betriebs-Floor** liegt (Details: [HERMES_SETUP.md](HERMES_SETUP.md)):
-api_key zwingend in Config, context_length-Override an zwei Stellen, Output-Cap auf
-2048. Ohne diese läuft B in hermes gar nicht. Das ist reale Friktion, kein 3×-Boost.
+**Noch kein inhaltlicher Modell-Befund** — beide bestehen die bisherigen Trivial-Tasks.
+
+**Operative Notiz (KEIN Modell-Befund):** AgentWorld (B) brauchte vier
+hermes-Workarounds zum Starten (api_key in Config, context_length-Override ×2,
+max_tokens-Cap), Qwen3.6 (A) keinen. Ursache ist aber **reine Serving-Asymmetrie**,
+nicht das Modell: B wird auf der vast-GPU mit nur **32k** Kontext serviert (VRAM-bound,
+NVFP4 auf 1× RTX PRO 5000), A lokal mit **256k / 512k KV-Cache**. Das Model Card von B
+behauptet selbst **262k** — die 32k sind eine Hardware-/Config-Entscheidung. Wird B mit
+≥64k serviert, verschwinden die Workarounds. → **Nicht** als „Agenten laufen schlechter"
+werten; nur als Deployment-Hürde *bei dieser Serving-Config* notieren. Im Benchmark
+neutralisiert durch Paritäts-Cap (beide auf 64k/2048, s. THREATS §5c).
 
 ## Track 1 — Hype-Test (Policy / Agent), Stand
 

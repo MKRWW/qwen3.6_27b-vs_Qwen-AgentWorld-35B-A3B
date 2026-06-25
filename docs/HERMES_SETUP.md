@@ -62,11 +62,12 @@ auxiliary:
 
 ## Was das für den Hype-Test bedeutet
 
-A (Qwen3.6, 262k Kontext) lief ohne jeden Workaround. B (AgentWorld) brauchte vier
-Eingriffe, im Kern weil **sein 32k-Serving-Kontext unter hermes' 64k-Betriebs-Floor
-liegt**. Das ist reale Friktion gegen die Behauptung „alle Agenten laufen besser" —
-und gehört als qualitatives Finding in [FINDINGS.md](FINDINGS.md) (nicht in eine
-Erfolgs-/Fehler-Zahl, da via Override umgehbar).
+A lief ohne Workaround, B brauchte vier — aber **das ist Serving-Config, kein
+Modell-Befund.** Ursache ist allein, dass B auf der vast-GPU mit nur **32k** serviert
+wird (VRAM-bound), während A lokal mit **256k / 512k KV-Cache** läuft. B's Model Card
+behauptet selbst 262k. Würde B mit ≥64k serviert, entfielen die Overrides. → **Nicht**
+als „Agenten laufen schlechter" werten (s. THREATS §5c); nur als Deployment-Hürde
+*dieser Serving-Config* dokumentieren.
 
 > Hinweis: `context_length: 64000` ist eine *Notlüge* an hermes. Solange ein Task
 > real unter 32k bleibt (unsere Tasks: ~10k), funktioniert es. Größere Kontexte
