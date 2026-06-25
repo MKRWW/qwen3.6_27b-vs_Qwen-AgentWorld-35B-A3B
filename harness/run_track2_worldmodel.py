@@ -17,6 +17,7 @@ import argparse
 import glob
 import json
 import os
+import re
 import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
@@ -24,20 +25,39 @@ import client as C          # noqa: E402
 import graders as G         # noqa: E402
 from record import Recorder  # noqa: E402
 
-# Domänen-spezifisches System-Prompt (Card empfiehlt eigene Prompts pro Domäne).
-# Platzhalter — finale Prompts aus dem AgentWorld-GitHub übernehmen.
-SYSTEM_BY_DOMAIN = {
-    "terminal": (
-        "You are a world model simulating a Linux shell. Given the session history "
-        "and the next command, output ONLY the resulting terminal observation "
-        "(stdout/stderr and the resulting exit code). Do not explain."
-    ),
-    "swe": (
-        "You are a world model simulating a software repository. Given the repo "
-        "history and the next action, output ONLY the resulting observation "
-        "(command output / test results / file state). Do not explain."
-    ),
-}
+PROMPT_DIR = os.path.join(os.path.dirname(__file__), "..", "config", "prompts")
+_PROMPT_CACHE: dict[str, str] = {}
+
+
+def system_prompt(domain: str) -> str:
+    """Offiziellen AgentWorld-Domänen-System-Prompt laden (aus config/prompts/<domain>/).
+    So testen wir das Modell mit GENAU dem Prompt, fuer den es trainiert wurde."""
+    if domain not in _PROMPT_CACHE:
+        path = os.path.join(PROMPT_DIR, domain, "system_prompt.txt")
+        with open(path, encoding="utf-8") as f:
+            _PROMPT_CACHE[domain] = f.read()
+    return _PROMPT_CACHE[domain]
+
+
+def _user_turn(action: str) -> str:
+    # Offizielles Inferenz-Format (Repo-Beispiel): Action: execute_bash\nCommand: <cmd>
+    return f"Action: execute_bash\nCommand: {action}"
+
+
+def _strip_think(text: str) -> str:
+    """Falls der Reasoning-Parser den <think>-Block NICHT abtrennt, hier entfernen."""
+    return re.sub(r"<think>.*?</think>\s*", "", text or "", flags=re.S).strip()
+
+
+def build_messages(triple: dict) -> list[dict]:
+    """Offizielles Setup: Domänen-System-Prompt + multi-turn (History als echte
+    Konversation aus User-Action / Assistant-Observation) + aktuelle Action."""
+    msgs = [{"role": "system", "content": system_prompt(triple.get("domain", "terminal"))}]
+    for h in triple.get("history", []):
+        msgs.append({"role": "user", "content": _user_turn(h.get("action", ""))})
+        msgs.append({"role": "assistant", "content": h.get("observation", "")})
+    msgs.append({"role": "user", "content": _user_turn(triple["action"])})
+    return msgs
 
 
 def load_triples(tasks_dir: str) -> list[dict]:
@@ -51,16 +71,11 @@ def load_triples(tasks_dir: str) -> list[dict]:
 
 
 def predict(cli: C.Client, triple: dict, max_tokens: int) -> tuple[str, dict]:
-    domain = triple.get("domain", "terminal")
-    msgs = [
-        {"role": "system", "content": SYSTEM_BY_DOMAIN.get(domain, SYSTEM_BY_DOMAIN["terminal"])},
-        {"role": "user", "content": json.dumps(
-            {"history": triple.get("history", []), "action": triple["action"]},
-            ensure_ascii=False)},
-    ]
-    # Next-State-Simulation: Thinking aus -> direkte Observation (siehe client.chat).
-    resp = cli.chat(msgs, max_tokens=max_tokens, enable_thinking=False)
-    return C.first_text(resp), resp
+    # WICHTIG: Thinking AN (Card: Modell nutzt <think> fuer State-Transitions).
+    # enable_thinking NICHT setzen -> Default (an). Reasoning-Parser trennt den
+    # think-Block ab; falls nicht, _strip_think() als Fallback.
+    resp = cli.chat(build_messages(triple), max_tokens=max_tokens)
+    return _strip_think(C.first_text(resp)), resp
 
 
 def judge(judge_cli: C.Client, triple: dict, prediction: str, max_tokens: int) -> dict:

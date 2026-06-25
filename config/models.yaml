@@ -47,7 +47,7 @@ sampling_regimes:
 
 max_tokens:
   track1_policy: 2048
-  track2_worldmodel: 1024
+  track2_worldmodel: 8192   # Thinking AN (Card-Default) braucht Platz fuer <think>+Screen
 
 judge:
   # Self-Judging vermeiden: B wird nie von B gejudged.

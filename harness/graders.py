@@ -42,57 +42,42 @@ def _norm(s: str) -> str:
     return re.sub(r"[ \t]+", " ", (s or "").strip().lower())
 
 
-def score_factuality(prediction: str, truth: dict) -> dict:
-    """Grader v2 — kontinuierlich, vergleicht Vorhersage gegen reale Ausfuehrung.
+def _line_recall(truth_text: str, pred_n: str) -> tuple[float, int]:
+    """Anteil der (normalisierten, nicht-leeren) Wahrheits-Zeilen, die im
+    vorhergesagten Screen vorkommen. Robust gegen Prompt-/Echo-Beiwerk."""
+    lines = [ln for ln in _norm(truth_text).splitlines() if ln.strip()]
+    if not lines:
+        return 1.0, 0
+    hit = sum(1 for ln in lines if ln in pred_n)
+    return hit / len(lines), len(lines)
 
-    Sub-Scores 0..1 (gewichtet -> 'factuality' 0..100):
-    - exit_code      : korrekter Exit-Code genannt (falls != 0 immer relevant)
-    - stdout_sim     : difflib-Aehnlichkeit (normalisiert) -> Teil-Credit fuer 'fast'
-    - stdout_recall  : Anteil echter stdout-Zeilen, die vorkommen
-    - stderr_sim     : Aehnlichkeit der Fehlerausgabe (nur falls truth stderr hat)
-    - fs_paths       : erwartete neue Dateien/Ordner genannt
+
+def score_factuality(prediction: str, truth: dict) -> dict:
+    """Grader v3 — fair fuer das offizielle Terminal-SCREEN-Format.
+
+    Das Modell gibt den ganzen Screen aus (Prompt + Command-Echo + Output + neuer
+    Prompt). Exit-Code und fs-Delta sind im Screen NICHT sichtbar -> wir bewerten
+    nur die wirklich sichtbare Ausgabe: Recall ueber echte stdout- + stderr-Zeilen.
+    Falscher Output -> Zeile fehlt -> Recall < 1 (diskriminiert weiter); korrektes
+    Screen-Format wird NICHT bestraft.
     """
     pred = prediction or ""
     pred_n = _norm(pred)
-    sub: dict[str, Any] = {}
-    weights: dict[str, float] = {}
+    out_recall, n_out = _line_recall(truth.get("stdout") or "", pred_n)
+    err_recall, n_err = _line_recall(truth.get("stderr") or "", pred_n)
 
-    exp_exit = truth.get("exit_code")
-    if exp_exit is not None:
-        # Exit-Code zaehlt staerker bei Fehlern (!=0), wo er diagnostisch ist.
-        sub["exit_code"] = 1.0 if re.search(rf"(^|\D){exp_exit}(\D|$)", pred) else 0.0
-        weights["exit_code"] = 1.5 if exp_exit != 0 else 0.5
+    # truth ohne sichtbare Ausgabe (stiller Erfolg): Screen soll nur Prompt+Command
+    # zeigen, keine erfundene Ausgabe/Fehler.
+    if n_out == 0 and n_err == 0:
+        spurious = bool(re.search(r"error|traceback|no such file|not found|denied", pred_n))
+        return {"factuality": 30.0 if spurious else 100.0,
+                "sub": {"silent_success": 0.0 if spurious else 1.0}}
 
-    truth_out = truth.get("stdout") or ""
-    if truth_out.strip():
-        sub["stdout_sim"] = SequenceMatcher(None, _norm(truth_out), pred_n).ratio()
-        weights["stdout_sim"] = 2.0
-        lines = [ln for ln in (_norm(truth_out).splitlines()) if ln.strip()]
-        if lines:
-            hit = sum(1 for ln in lines if ln in pred_n)
-            sub["stdout_recall"] = hit / len(lines)
-            weights["stdout_recall"] = 1.5
-
-    truth_err = truth.get("stderr") or ""
-    if truth_err.strip():
-        sub["stderr_sim"] = SequenceMatcher(None, _norm(truth_err), pred_n).ratio()
-        weights["stderr_sim"] = 1.5
-
-    paths = list(truth.get("fs_delta") or [])
-    if paths:
-        hit = sum(1 for p in paths if p.lower() in pred_n)
-        sub["fs_paths"] = hit / len(paths)
-        weights["fs_paths"] = 1.0
-
-    if not sub:
-        # truth ist leer (z.B. erfolgreicher stiller Befehl) -> Modell soll auch leer/knapp sein
-        empty_pred = len(pred.strip()) <= 4
-        return {"factuality": 100.0 if empty_pred else 40.0,
-                "sub": {"empty_expected": 1.0 if empty_pred else 0.0}}
-
-    num = sum(sub[k] * weights[k] for k in sub)
-    den = sum(weights[k] for k in sub)
-    return {"factuality": round(100 * num / den, 1), "sub": {k: round(v, 3) for k, v in sub.items()}}
+    num = out_recall * (2.0 if n_out else 0) + err_recall * (1.5 if n_err else 0)
+    den = (2.0 if n_out else 0) + (1.5 if n_err else 0)
+    return {"factuality": round(100 * num / den, 1),
+            "sub": {"stdout_recall": round(out_recall, 3) if n_out else None,
+                    "stderr_recall": round(err_recall, 3) if n_err else None}}
 
 
 def score_format(prediction: str, expected_schema: str | None = None) -> dict:
