@@ -8,15 +8,18 @@ models:
     model_id: qwen3.6-27b
     api_key_env: QWEN_API_KEY        # vLLM lokal akzeptiert oft beliebigen Key
     quant: int4-autoround
-    notes: LAN, vLLM, qwen3-tool-parser aktiv, max_model_len=262144
+    notes: LAN (2x RTX 3090), vLLM, qwen3-tool-parser aktiv, max_model_len=262144
 
   B:
     name: AgentWorld-35B-A3B
     endpoint: http://194.228.55.129:37773/v1
-    model_id: TODO_FROM_PROBE        # via probe_endpoints.sh füllen
-    api_key_env: AGENTWORLD_API_KEY  # Bearer = $OPEN_BUTTON_TOKEN/$WEB_PASSWORD
-    quant: bf16
-    notes: vast.ai remote, MoE 35B/3B-aktiv, Tool-Parser UNBEKANNT
+    model_id: lovedheart/Qwen-AgentWorld-35B-A3B-NVFP4
+    api_key_env: AGENTWORLD_API_KEY
+    quant: nvfp4
+    notes: vast.ai (1x RTX PRO 5000), MoE 35B/3B-aktiv, Tool-Parser AKTIV (verifiziert), max_model_len=32000
+
+# Fairness-Cap: B serviert nur 32k Kontext, A 262k -> beide Prompts auf 32k begrenzen.
+context_cap_tokens: 32000
 
 # Sampling-Regime (siehe docs/METHODOLOGY.md §1)
 sampling_regimes:

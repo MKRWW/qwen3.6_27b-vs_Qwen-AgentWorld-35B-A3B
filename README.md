@@ -33,13 +33,17 @@ der falschen Aufgabe.*
 
 | Kürzel | Modell | Endpoint | Quant | Hinweis |
 |--------|--------|----------|-------|---------|
-| **A** | Qwen3.6-27b | `192.168.178.21:8000/v1` (LAN, vLLM) | int4 (AutoRound) | `id=qwen3.6-27b`, Tool-Parser aktiv |
-| **B** | AgentWorld-35B-A3B | `194.228.55.129:37773/v1` (vast.ai) | bf16 | MoE, 3B aktiv, Tool-Parser unbekannt |
+| **A** | Qwen3.6-27b | `192.168.178.21:8000/v1` (LAN, 2× RTX 3090) | int4 (AutoRound) | `id=qwen3.6-27b`, Tool-Parser aktiv, ctx 262k |
+| **B** | AgentWorld-35B-A3B | `194.228.55.129:37773/v1` (vast.ai, 1× RTX PRO 5000) | NVFP4 | MoE 3B aktiv, **Tool-Parser aktiv (verifiziert)**, ctx 32k |
 
-> ⚠️ **Das ist kein cleaner Apples-to-Apples-Vergleich** (int4 vs bf16, 27B dense
-> vs 35B-A3B MoE, LAN vs Remote-Latenz, unterschiedlicher Zweck). Wir vergleichen
-> bewusst **"wie es bei euch wirklich läuft"** und dokumentieren jede Verzerrung
-> offen in [docs/THREATS.md](docs/THREATS.md). Lies das, bevor du Zahlen zitierst.
+> ⚠️ **Das ist kein cleaner Apples-to-Apples-Vergleich** (int4 vs NVFP4, 27B dense
+> vs 35B-A3B MoE, unterschiedlicher Zweck). Wir vergleichen bewusst **"wie es bei
+> euch wirklich läuft"** und dokumentieren jede Verzerrung offen in
+> [docs/THREATS.md](docs/THREATS.md). Lies das, bevor du Zahlen zitierst.
+>
+> **Latenz/Speed ist KEINE Vergleichsmetrik** — verschiedene GPUs, LAN vs Remote.
+> Wall-clock wird nur informativ geloggt, nie als Modell-Qualität gewertet.
+> Beide Prompts werden auf **32k Kontext** gecappt (B's Serving-Limit).
 
 ## Schnellstart
 

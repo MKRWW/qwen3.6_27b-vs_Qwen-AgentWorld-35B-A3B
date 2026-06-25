@@ -5,10 +5,10 @@ Das ist absichtlich, aber es ist **kein** sauberer Modell-gegen-Modell-Vergleich
 Hier ist offen, was die Ergebnisse verzerrt.
 
 ## 1. Quantisierung (groß)
-- **A (Qwen3.6-27b) läuft int4 (AutoRound), B (AgentWorld) läuft bf16.**
-- int4 kann Qualität kosten. Ein etwaiger B-Vorsprung kann teils Quant-Artefakt sein,
-  kein Architektur-/Trainings-Vorteil.
-- *Minderung:* als Vorbehalt benennen; falls bf16-Qwen verfügbar, Gegenprobe.
+- **A (Qwen3.6-27b) läuft int4 (AutoRound), B (AgentWorld) läuft NVFP4.**
+- Beide sind 4-bit-quantisiert, aber unterschiedliche Schemata (AutoRound-int4 vs
+  NVFP4). Qualitätsverlust ist bei beiden möglich und nicht symmetrisch.
+- *Minderung:* als Vorbehalt benennen; keine Aussage über die unquantisierten Modelle.
 
 ## 2. Unterschiedlicher Modell-Zweck (der Kernpunkt)
 - B ist ein **World Model**, A ein **Policy-Modell**. Track 1 testet B außerhalb
@@ -20,17 +20,21 @@ Hier ist offen, was die Ergebnisse verzerrt.
 - 27B (A) vs 35B-A3B MoE mit 3B aktiv (B). Weder Gesamt- noch Aktiv-Parameter sind
   gleich. "Größer" ≠ "besser", aber es ist eine Variable, die wir nicht kontrollieren.
 
-## 4. Latenz / Netzwerk (nicht fair)
-- A: LAN (`192.168.178.21`). B: Remote vast.ai (`194.228.55.129`).
-- `wall_clock_s` und tok/s sind durch Netzwerk + GPU-Last + Concurrency der vast-Instanz
-  verzerrt. **Latenz-Vergleiche sind nur als grobe Größenordnung zu lesen.**
+## 4. Latenz / Netzwerk / GPU (KEINE Vergleichsmetrik)
+- A: LAN, 2× RTX 3090. B: Remote vast.ai, 1× RTX PRO 5000. Komplett verschiedene
+  Hardware UND Netzwerkpfade.
+- `wall_clock_s` und tok/s werden **nur informativ geloggt** und gehen **nicht** in
+  die Bewertung ein. Speed-Aussagen wären Äpfel-mit-Birnen.
 
-## 5. Tool-Parser-Asymmetrie
-- A hat laut Setup einen aktiven qwen3-Tool-Parser. Ob B's vLLM-Serve einen
-  Tool-Call-Parser hat, ist **offen** (`probe_endpoints.sh` klärt das).
-- Fehlt er bei B, "verliert" B Track 1 evtl. aus reinem Serving-Grund, nicht wegen
-  des Modells. Dieser Fall wird als eigener `crash_reason` ausgewiesen, nicht als
-  inhaltliches Versagen verbucht.
+## 5. Tool-Parser  (RESOLVED)
+- Beide Endpoints haben einen aktiven Tool-Call-Parser — für B per Probe verifiziert
+  (`calculator {"expr":"12 * 7"}` korrekt zurückgegeben).
+- Damit ist Track 1 fair: B "verliert" nicht aus reinem Serving-Grund. Falls trotzdem
+  einzelne malformed Tool-Calls auftreten, zählen sie inhaltlich (in `tool_call_valid_rate`).
+
+## 5b. Kontext-Cap (Fairness)
+- B serviert nur 32k Kontext, A 262k. Beide Prompts werden auf **32k** begrenzt,
+  damit kein Modell durch mehr/weniger Kontextfenster bevor-/benachteiligt wird.
 
 ## 6. Reasoning-Budget / leerer Content
 - Beide sind Reasoning-Modelle. Zu kleines `max_tokens` → Budget im Denk-Teil

@@ -9,10 +9,11 @@ landet im Run-Header jeder JSONL-Datei.
 | Kürzel | `model`-id (vom Endpoint) | Endpoint | Sampling-Default |
 |--------|---------------------------|----------|------------------|
 | A | `qwen3.6-27b` | `http://192.168.178.21:8000/v1` | greedy + Card-Settings |
-| B | `<von probe_endpoints.sh>` | `http://194.228.55.129:37773/v1` | greedy + Card-Settings |
+| B | `lovedheart/Qwen-AgentWorld-35B-A3B-NVFP4` | `http://194.228.55.129:37773/v1` | greedy + Card-Settings |
 
-Die `model`-id von B wird beim ersten `probe_endpoints.sh`-Lauf ausgelesen und in
-`config/models.yaml` eingetragen (Platzhalter bis dahin).
+Beide Endpoints haben einen aktiven Tool-Call-Parser (für B per Probe verifiziert).
+**Kontext-Cap:** B serviert nur 32k, A 262k → alle Prompts werden auf **32.000
+Tokens** begrenzt (Fairness, siehe THREATS §5b).
 
 ## 1. Sampling-Regime
 
@@ -50,7 +51,7 @@ identische Tool-Definitionen.
 | `tool_call_valid_rate` | Anteil syntaktisch & semantisch gültiger Tool-Calls (JSON parsebar, Tool existiert, Args-Schema erfüllt) |
 | `turns_to_done` | Agent-Schritte bis Erfolg/Abbruch |
 | `tokens_in/out` | Summe über alle Turns |
-| `wall_clock_s` | Ende-zu-Ende-Zeit (Latenz-Vorbehalt: B ist Remote) |
+| `wall_clock_s` | Ende-zu-Ende-Zeit — **nur informativ, NICHT bewertet** (verschiedene GPUs/Netz) |
 | `crash_reason` | bei Abbruch: malformed-tool-call / loop / timeout / empty-content |
 
 `max_tokens` Track 1: **2048** pro Turn.
