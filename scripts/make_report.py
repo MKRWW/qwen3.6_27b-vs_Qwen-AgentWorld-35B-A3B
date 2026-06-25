@@ -56,9 +56,9 @@ def report_track2(runs):
             continue
         fact = mean([r["factuality"]["factuality"] for r in res])
         fmt = mean([r["format"]["format"] for r in res])
-        con = mean([r["judge"].get("consistency") for r in res])
-        rea = mean([r["judge"].get("realism") for r in res])
-        qua = mean([r["judge"].get("quality") for r in res])
+        con = mean([(r.get("judge") or {}).get("consistency") for r in res])
+        rea = mean([(r.get("judge") or {}).get("realism") for r in res])
+        qua = mean([(r.get("judge") or {}).get("quality") for r in res])
         print(f"| {h['model']} | {h['regime']} | {len(res)} | {fact} | {fmt} | "
               f"{con} | {rea} | {qua} |")
     print()

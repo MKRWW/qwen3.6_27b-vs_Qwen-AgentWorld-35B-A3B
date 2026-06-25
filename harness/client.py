@@ -73,9 +73,15 @@ class Client:
 
     def chat(self, messages: list[dict], *, max_tokens: int,
              tools: list[dict] | None = None, tool_choice: Any = None,
+             enable_thinking: bool | None = None,
              extra: dict | None = None) -> dict:
-        """Ein Chat-Completion-Call. Gibt das rohe Response-Dict zurück und loggt alles."""
-        # top_k ist kein Standard-OpenAI-Param -> via extra_body an vLLM durchreichen.
+        """Ein Chat-Completion-Call. Gibt das rohe Response-Dict zurück und loggt alles.
+
+        enable_thinking: bei Qwen3-Modellen Reasoning-Block an/aus (chat_template_kwargs).
+        Für Track 2 (Next-State-Simulation) auf False -> direkte Observation statt
+        Gedankenkette (sonst frisst <think> das Token-Budget -> leerer content).
+        """
+        # top_k / chat_template_kwargs sind keine Standard-OpenAI-Params -> via extra_body.
         params: dict[str, Any] = {
             "model": self.model.model_id,
             "messages": messages,
@@ -88,6 +94,8 @@ class Client:
                 params[k] = sp[k]
         if "top_k" in sp:
             extra_body["top_k"] = sp["top_k"]
+        if enable_thinking is not None:
+            extra_body["chat_template_kwargs"] = {"enable_thinking": enable_thinking}
         if tools:
             params["tools"] = tools
             if tool_choice is not None:

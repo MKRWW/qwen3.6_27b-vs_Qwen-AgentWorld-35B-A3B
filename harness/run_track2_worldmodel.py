@@ -58,14 +58,15 @@ def predict(cli: C.Client, triple: dict, max_tokens: int) -> tuple[str, dict]:
             {"history": triple.get("history", []), "action": triple["action"]},
             ensure_ascii=False)},
     ]
-    resp = cli.chat(msgs, max_tokens=max_tokens)
+    # Next-State-Simulation: Thinking aus -> direkte Observation (siehe client.chat).
+    resp = cli.chat(msgs, max_tokens=max_tokens, enable_thinking=False)
     return C.first_text(resp), resp
 
 
 def judge(judge_cli: C.Client, triple: dict, prediction: str, max_tokens: int) -> dict:
     msgs = G.build_judge_messages(
         triple.get("history", []), triple["action"], triple["truth"], prediction)
-    resp = judge_cli.chat(msgs, max_tokens=max_tokens)
+    resp = judge_cli.chat(msgs, max_tokens=max_tokens, enable_thinking=False)
     return G.parse_judge(C.first_text(resp))
 
 
@@ -74,42 +75,53 @@ def main():
     ap.add_argument("--models", default="A,B")
     ap.add_argument("--regime", default="greedy")
     ap.add_argument("--tasks", default="tasks/")
-    ap.add_argument("--judge", default=None, help="Modell-Key des Judges (kein Self-Judging)")
+    ap.add_argument("--judge", default=None,
+                    help="Modell-Key des Judges (Cross-Judging, kein Self-Judging). "
+                         "'none' = nur deterministische Scores.")
     args = ap.parse_args()
 
     cfg = C.load_config()
     regime = C.get_regime(args.regime, cfg)
     max_tok = cfg["max_tokens"]["track2_worldmodel"]
-    judge_key = args.judge or cfg["judge"]["default"]
+    model_keys = args.models.split(",")
     triples = load_triples(args.tasks)
     print(f"{len(triples)} Triples geladen.")
 
-    for model_key in args.models.split(","):
-        if model_key == judge_key:
-            print(f"  Hinweis: Judge={judge_key} == Prüfling {model_key} -> Self-Judging "
-                  f"vermieden, nutze alternativen Judge.")
-        eff_judge_key = cfg["judge"]["alt"] if model_key == judge_key else judge_key
+    def pick_judge(model_key: str) -> str | None:
+        """Neutralen Judge wählen: nie das Modell selbst. Bei genau 2 Modellen ->
+        Cross-Judging (das jeweils andere). --judge none schaltet Judge ab."""
+        if args.judge == "none":
+            return None
+        if args.judge:
+            return None if args.judge == model_key else args.judge
+        others = [k for k in model_keys if k != model_key]
+        return others[0] if others else None
 
+    for model_key in model_keys:
+        eff_judge_key = pick_judge(model_key)
         model = C.get_model(model_key, cfg)
         rec = Recorder(track=2, model_key=model_key, model_id=model.model_id,
                        endpoint=model.endpoint, regime=regime.name, sampling=regime.params)
         cli = C.Client(model, regime, recorder=rec)
-        judge_model = C.get_model(eff_judge_key, cfg)
-        judge_cli = C.Client(judge_model, C.get_regime("greedy", cfg), recorder=rec)
+        judge_cli = None
+        if eff_judge_key:
+            judge_model = C.get_model(eff_judge_key, cfg)
+            judge_cli = C.Client(judge_model, C.get_regime("greedy", cfg), recorder=rec)
+        print(f"  Modell {model_key}: Judge = {eff_judge_key or 'KEINER (nur deterministisch)'}")
 
         with rec:
             for t in triples:
                 prediction, _ = predict(cli, t, max_tok)
                 fact = G.score_factuality(prediction, t["truth"])
                 fmt = G.score_format(prediction, t.get("format_schema"))
-                jdg = judge(judge_cli, t, prediction, max_tok)
+                jdg = judge(judge_cli, t, prediction, max_tok) if judge_cli else None
                 rec.log_result(
                     triple_id=t["_id"], domain=t.get("domain"),
                     prediction=prediction, factuality=fact, format=fmt, judge=jdg,
                     judge_model=eff_judge_key,
                 )
                 print(f"  [{model_key}] {t['_id']}: fact={fact['factuality']} "
-                      f"fmt={fmt['format']} judge={jdg}")
+                      f"fmt={fmt['format']}" + (f" judge={jdg}" if jdg else ""))
         print(f"  -> {rec.path}")
 
 

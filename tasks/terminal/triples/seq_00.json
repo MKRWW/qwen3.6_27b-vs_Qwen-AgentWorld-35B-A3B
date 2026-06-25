@@ -1,0 +1,13 @@
+{
+  "domain": "terminal",
+  "history": [],
+  "action": "mkdir demo && cd demo 2>/dev/null; echo ok",
+  "truth": {
+    "stdout": "ok",
+    "stderr": "",
+    "exit_code": 0,
+    "cwd": "/tmp/tmp.Pc9JgBkece/demo",
+    "fs_delta": []
+  },
+  "format_schema": null
+}
