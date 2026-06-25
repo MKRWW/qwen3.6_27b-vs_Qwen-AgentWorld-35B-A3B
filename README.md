@@ -54,8 +54,8 @@ cp .env.example .env        # Endpoints + AgentWorld-Token eintragen
 python harness/run_track1_policy.py  --models A,B --tasks tasks/
 # Track 2 (World Model):
 python harness/run_track2_worldmodel.py --models A,B --tasks tasks/
-# Report:
-python scripts/make_report.py results/ > docs/FINDINGS.md
+# Report (Auto-Tabellen; docs/FINDINGS.md ist kuratiert):
+python scripts/make_report.py results/raw
 ```
 
 ## Repo-Struktur

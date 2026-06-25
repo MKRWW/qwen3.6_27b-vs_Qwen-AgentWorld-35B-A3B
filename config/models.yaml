@@ -21,6 +21,18 @@ models:
 # Fairness-Cap: B serviert nur 32k Kontext, A 262k -> beide Prompts auf 32k begrenzen.
 context_cap_tokens: 32000
 
+# Track-1-Harness-Settings (hermes). IDENTISCH fuer A und B = Paritaet.
+# Hintergrund: B (AgentWorld) serviert nur 32k, hermes verlangt aber >=64k. Wir
+# ueberschreiben context_length auf 64000 (Pflicht, sonst Start verweigert) UND
+# cappen max_tokens auf 2048, damit reale Requests in B's 32k-Fenster passen.
+# Dieselben Werte fuer A, damit der Agent-Loop fair vergleichbar ist.
+# Siehe docs/HERMES_SETUP.md fuer die volle Recipe + Begruendung.
+hermes:
+  context_length: 64000     # Override (B real 32k < hermes-Floor 64k)
+  max_tokens: 2048          # Output-Cap, damit Requests in B's 32k passen
+  max_turns: 30
+  toolset: hermes-cli       # Standard-Bundle (Shell + Datei-Editing)
+
 # Sampling-Regime (siehe docs/METHODOLOGY.md §1)
 sampling_regimes:
   greedy:

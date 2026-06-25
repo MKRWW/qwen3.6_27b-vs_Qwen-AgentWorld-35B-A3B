@@ -41,6 +41,34 @@ next-state voraus → deterministisches Scoring. Läuft sauber gegen beide Endpo
       SWE-Oracle end-to-end fahren.
 - [ ] **Card-Regime.** Bisher nur `greedy`. `card`-Regime (temp 0.6/0.95/20) gegenlaufen.
 
+## 2026-06-25 (Forts.) — Track 1 (hermes/Policy) end-to-end
+
+### hermes-Integration geknackt (beide Modelle)
+hermes hat **kein** `run`-Subcommand → One-Shot via `-z`. Nicht-invasiv über
+isoliertes `HERMES_HOME`. Volle Recipe + 4 Stolpersteine in
+[HERMES_SETUP.md](HERMES_SETUP.md).
+
+- **A (Qwen3.6)** lief ohne Workaround.
+- **B (AgentWorld)** brauchte: api_key in Config (401), context_length=64000 an zwei
+  Stellen (32k < hermes-Floor 64k), max_tokens=2048 (sonst `'final_response'`-Crash,
+  weil hermes 65k Output anforderte > B's 32k-Fenster).
+
+### Erster echter SWE-Task end-to-end (reproduzierbar via Code)
+`run_track1_policy.py` neu: isolierte Bench-Homes, WSL-Sandbox, pytest-Oracle in
+dedizierter venv (`~/.cache/awbench-venv`), base64-robustes Result-Parsing.
+- Buggy → pytest FAIL; **A** fixt korrekt → PASS; **B** fixt korrekt → PASS.
+- Beide bestehen den Trivial-Task → diskriminiert (noch) nicht.
+
+### Befund
+Qualitativ robust: **B's 32k-Kontext liegt unter hermes' 64k-Floor** → vier
+Eingriffe nötig, damit B als Agent überhaupt startet. A „lief einfach". Das ist
+reale Friktion gegen „alle Agenten laufen besser". Siehe [FINDINGS.md](FINDINGS.md).
+
+### Noch offen (für belastbare Zahlen)
+- [ ] Diskriminierende Task-/Triple-Suite (beide Tracks).
+- [ ] Grader v2 + LLM-Judge aktivieren.
+- [ ] `card`-Regime gegenlaufen.
+
 ### Hinweis zur Interpretation
 Latenz/Speed wird **nicht** verglichen (verschiedene GPUs/Netz). Stichproben sind
 klein → Richtungs-Indikatoren, keine Signifikanz. Siehe THREATS.md.

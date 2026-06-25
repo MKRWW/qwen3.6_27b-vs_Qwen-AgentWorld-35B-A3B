@@ -34,7 +34,23 @@ class SamplingRegime:
     params: dict[str, Any] = field(default_factory=dict)
 
 
+def load_dotenv(path: str | None = None) -> None:
+    """Minimaler .env-Loader (keine Extra-Dependency). Setzt nur fehlende Keys."""
+    path = path or os.path.join(os.path.dirname(__file__), "..", ".env")
+    if not os.path.exists(path):
+        return
+    with open(path, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            k, v = line.split("=", 1)
+            k, v = k.strip(), v.strip().strip('"').strip("'")
+            os.environ.setdefault(k, v)
+
+
 def load_config(path: str = CONFIG_PATH) -> dict:
+    load_dotenv()
     with open(path, "r", encoding="utf-8") as f:
         return yaml.safe_load(f)
 

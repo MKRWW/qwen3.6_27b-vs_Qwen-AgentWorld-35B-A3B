@@ -10,6 +10,12 @@ import os
 import sys
 from collections import defaultdict
 
+# Windows-Konsole/Redirect ist sonst cp1252 -> UnicodeEncodeError bei → / —
+try:
+    sys.stdout.reconfigure(encoding="utf-8")
+except Exception:
+    pass
+
 
 def read_runs(raw_dir: str):
     runs = []
@@ -34,16 +40,15 @@ def mean(xs):
 
 def report_track1(runs):
     print("## Track 1 — Hype-Test (Policy / Agent)\n")
-    print("| Modell | Regime | Tasks | Success-Rate | Crashes |")
-    print("|--------|--------|-------|--------------|---------|")
+    print("| Modell | Regime | Tasks | Success-Rate | hermes-Fehler |")
+    print("|--------|--------|-------|--------------|---------------|")
     for h, res in runs:
         if h["track"] != 1:
             continue
-        succ = [r["oracle"].get("success") for r in res]
-        ok = sum(1 for s in succ if s)
-        crashes = sum(1 for r in res if r["run"].get("crash"))
+        ok = sum(1 for r in res if r.get("oracle_pass"))
+        errs = sum(1 for r in res if r.get("hermes_exit") not in (0, None))
         rate = f"{ok}/{len(res)}" if res else "0/0"
-        print(f"| {h['model']} | {h['regime']} | {len(res)} | {rate} | {crashes} |")
+        print(f"| {h['model']} | {h['regime']} | {len(res)} | {rate} | {errs} |")
     print()
 
 
