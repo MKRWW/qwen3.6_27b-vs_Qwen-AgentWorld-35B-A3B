@@ -20,7 +20,7 @@ except Exception:
 def read_runs(raw_dir: str):
     runs = []
     for path in sorted(glob.glob(os.path.join(raw_dir, "*.jsonl"))):
-        header, results = None, []
+        header, results, toks = None, [], []
         with open(path, encoding="utf-8") as f:
             for line in f:
                 obj = json.loads(line)
@@ -28,9 +28,19 @@ def read_runs(raw_dir: str):
                     header = obj
                 elif obj.get("type") == "result":
                     results.append(obj)
+                elif obj.get("type") == "api_call" and obj.get("response"):
+                    ct = (obj["response"].get("usage") or {}).get("completion_tokens")
+                    if ct:
+                        toks.append(ct)
         if header:
+            header["_tokens"] = toks
             runs.append((header, results))
     return runs
+
+
+def _median(xs):
+    xs = sorted(x for x in xs if x is not None)
+    return xs[len(xs) // 2] if xs else None
 
 
 def mean(xs):
@@ -54,19 +64,20 @@ def report_track1(runs):
 
 def report_track2(runs):
     print("## Track 2 — World-Model-Fidelity\n")
-    print("| Modell | Regime | Triples | Factuality | Format | Consist. | Realism | Quality |")
-    print("|--------|--------|---------|-----------|--------|----------|---------|---------|")
+    print("| Modell | Regime | Triples | Factuality | Format | tok(median) | Consist.* |")
+    print("|--------|--------|---------|-----------|--------|-------------|-----------|")
     for h, res in runs:
         if h["track"] != 2:
             continue
         fact = mean([r["factuality"]["factuality"] for r in res])
         fmt = mean([r["format"]["format"] for r in res])
         con = mean([(r.get("judge") or {}).get("consistency") for r in res])
-        rea = mean([(r.get("judge") or {}).get("realism") for r in res])
-        qua = mean([(r.get("judge") or {}).get("quality") for r in res])
+        tok = _median(h.get("_tokens", []))
         print(f"| {h['model']} | {h['regime']} | {len(res)} | {fact} | {fmt} | "
-              f"{con} | {rea} | {qua} |")
-    print()
+              f"{tok} | {con} |")
+    print("\n*Realism/Quality des LLM-Judge sind hier nicht vertrauenswürdig "
+          "(unkalibrierte Cross-Judges) — siehe FINDINGS.md. tok = completion_tokens "
+          "(Effizienz, fair vergleichbar).\n")
 
 
 def main():
@@ -74,7 +85,8 @@ def main():
     runs = read_runs(raw_dir)
     print("# FINDINGS — AgentWorld-35B-A3B vs Qwen3.6-27b\n")
     print("> Auto-generiert von scripts/make_report.py. **Vor dem Zitieren "
-          "docs/THREATS.md lesen** (int4 vs bf16, LAN vs Remote, kleine N).\n")
+          "docs/THREATS.md + FINDINGS.md lesen** (int4 vs NVFP4, nur Terminal, N=26, "
+          "Ceiling-Effekt).\n")
     if not runs:
         print("_Noch keine Runs in results/raw/._")
         return

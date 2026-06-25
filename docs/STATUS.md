@@ -87,3 +87,20 @@ klein → Richtungs-Indikatoren, keine Signifikanz. Siehe THREATS.md.
 
 ### Noch offen
 - [ ] card-Regime; neutraler Judge (Claude); SWE-Triples; N≥100; härtere Track-1-Tasks.
+
+## 2026-06-25 (Forts. 3) — Track-2-Testfehler gefunden & behoben (Skepsis-getrieben)
+
+Nutzer-Frage „haben wir keinen Testfehler? sind die Aufgaben zu leicht?" → Card neu
+gelesen. **Wir hatten Thinking abgeschaltet** (`enable_thinking=false`) — genau B's
+State-Mechanismus. Dazu generischer statt offizieller Prompt, falsches Input-Format,
+greedy statt card. Korrigiert: offizielle Domänen-Prompts aus dem Repo, multi-turn
+`Action/Command`-Format, Thinking AN, Grader v3 (Recall über sichtbaren Screen).
+
+Iteration (Test-Validität):
+- Lauf 8192: B 7× leer (`finish=length`) — **mein Limit**, nicht B. Card nennt 32768.
+- Lauf 32768: **A=98.3, B=98.3 (Genauigkeit identisch)**, aber B median **4348 vs 454
+  completion_tokens → ~9× teurer** für dasselbe Ergebnis.
+
+**Fazit Track 2:** AgentWorld auf Terminal-Next-State nicht genauer, nur ~9× token-
+hungriger. ABER beide bei 98.3 = **Ceiling** → Aufgaben evtl. zu leicht; echter
+World-Model-Vorteil bräuchte pre-existing-State/lange Trajektorien/GUI-Domänen.
