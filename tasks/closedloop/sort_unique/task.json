@@ -1,0 +1,6 @@
+{
+  "name": "sort_unique",
+  "goal": "Create a file sorted_unique.txt containing the lines of names.txt sorted alphabetically (ascending) with duplicate lines removed.",
+  "domain": "terminal",
+  "max_steps": 7
+}

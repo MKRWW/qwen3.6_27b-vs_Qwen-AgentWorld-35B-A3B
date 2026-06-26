@@ -1,0 +1,6 @@
+{
+  "name": "count_lines",
+  "goal": "The file data.txt contains several lines. Write the number of lines in data.txt (just the integer, nothing else) into a file count.txt.",
+  "domain": "terminal",
+  "max_steps": 6
+}

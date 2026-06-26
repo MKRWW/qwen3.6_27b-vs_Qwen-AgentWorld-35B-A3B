@@ -1,0 +1,6 @@
+{
+  "name": "rename_file",
+  "goal": "Rename the file old.txt to new.txt (the file old.txt must no longer exist, new.txt must exist with the same content).",
+  "domain": "terminal",
+  "max_steps": 6
+}

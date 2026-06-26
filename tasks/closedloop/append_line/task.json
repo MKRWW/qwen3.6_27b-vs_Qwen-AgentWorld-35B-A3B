@@ -1,0 +1,6 @@
+{
+  "name": "append_line",
+  "goal": "Append a new last line containing exactly DONE to the file log.txt, without changing the existing lines.",
+  "domain": "terminal",
+  "max_steps": 6
+}

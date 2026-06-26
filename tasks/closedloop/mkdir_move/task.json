@@ -1,0 +1,6 @@
+{
+  "name": "mkdir_move",
+  "goal": "Create a directory named backup and move the file notes.txt into it (so backup/notes.txt exists and ./notes.txt no longer does).",
+  "domain": "terminal",
+  "max_steps": 6
+}
