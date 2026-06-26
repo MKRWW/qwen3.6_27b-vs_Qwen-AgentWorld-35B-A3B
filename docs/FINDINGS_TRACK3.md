@@ -2,13 +2,24 @@
 
 ## ☀️ Morgens-Statusbericht
 
-> **TL;DR:** Im Closed-Loop löst ein echter Agent (Policy = Qwen3.6-27B) **alle** Tasks
-> sowohl gegen die echte Umgebung als auch gegen AgentWorld als Simulator — **trotz ~30 %
-> Per-Step-Divergenz** und **ohne eine einzige Täuschung**. Die „Per-Step-Fehler schaukeln
-> sich zu Task-Versagen auf"-Hypothese ist für **kurze, robuste-Befehl-Tasks widerlegt**.
-> Der Grund ist aber nuanciert (und nicht unbedingt ein Lob für B) — siehe Interpretation.
-> Ein **Langhorizont-Brutal-Test** (erzwingt Konsum halluzinierter Inhalte) läuft separat
-> und wird unten angehängt.
+> **TL;DR — die Antwort ist „es kommt drauf an", und zwar scharf.** Lässt man einen echten
+> Agenten (Policy = Qwen3.6-27B) gegen AgentWorld (B) **als Umgebung** laufen, hängt alles
+> daran, ob die Aufgabe den **simulierten Inhalt erzwingt**:
+>
+> | | **kurz** (agnostisch lösbar) | **lang/brutal** (Inhalt erzwungen) |
+> |---|---|---|
+> | Erfolg A@real (Baseline) | 100 % | 100 % |
+> | **Erfolg A@sim** (Real-Replay) | **100 %** | **25 % (16.7–33.3)** |
+> | **Getäuscht-Rate** | **0 %** | **25 % (16.7–33.3)** |
+> | Divergenz / Schritt | 30 % | **87 %** |
+>
+> Bei **kurzen** Tasks rettet sich der Agent mit umgebungs-agnostischen Befehlen (`awk`,
+> `sort -u`) — Per-Step-Fehler schaukeln sich NICHT auf. Sobald die Aufgabe ihn **zwingt**,
+> halluzinierten Inhalt zu **lesen und literal darauf zu entscheiden**, kollabiert die
+> Closed-Loop-Nutzung: nur noch 1 von 4 Aufgaben real gelöst, und in **1 von 4** glaubt der
+> Agent fälschlich, fertig zu sein. Beides repliziert (2 Reps), oracle-basiert, 0 € extern.
+> **Die ehrliche, vollständige Antwort auf „reicht ~84 % Per-Step-Fidelity für einen
+> Live-Agenten?": Nein — sobald es auf den simulierten Inhalt ankommt.**
 
 - **Was gemessen:** ReAct-Agent A löst 8 shell-lösbare Multi-Step-Tasks, einmal gegen die
   **echte** WSL-Sandbox (`real`, Baseline), einmal gegen **AgentWorld-35B-A3B („B")** als
@@ -24,14 +35,20 @@
   | **Divergenz / Schritt** (sim-Obs ≠ real-Obs) | **29.7 % (28.6–30.8)** — gepoolt 29.6 %, n=27 |
   | Token/Schritt Median — A (Policy) / B (Sim) | 70 / 5348 |
 
-- **Was robust ist:** Baseline-Erfolg (100 %) und Real-Replay-Erfolg (100 %) sind über
-  beide Reps identisch. Die Divergenz-Spannweite ist eng (28.6–30.8 %).
-- **Was unsicher / zu beachten ist:** kleine N, eine Domäne (Terminal), **kurze Horizonte**
-  (Tasks in 1–3 Schritten lösbar → der Aufschaukel-Effekt wird konservativ getestet).
-  Quant-Confound (A int4-autoround, B nvfp4). Deshalb der Langhorizont-Test (unten).
-- **Gefangene Bugs:** 1 (Divergenz-Artefakt, im Smoke-Test gefangen — siehe §Bugs).
-- **Publikationsreif?** **Ja** für die kurze-Horizont-Aussage (sauberer Baseline-Vergleich,
-  Oracle-basiert, repliziert). Die *vollständige* Geschichte braucht den Langhorizont-Teil.
+  Die **Langhorizont/Brutal-Zahlen** (N=6 × 2) stehen in §Track 3b — die Kurzfassung
+  (25 % / 25 % / 87 %) ist oben im TL;DR und in `docs/charts/track3_compare.png`.
+- **Was robust ist:** Beide Baselines 100 % über beide Reps. Der **Kontrast** kurz↔lang ist
+  groß und in beiden Reps gleichgerichtet (Spannweiten überlappen nicht: sim-Erfolg 100 %
+  vs 16.7–33.3 %). Das ist der belastbare Kern.
+- **Was unsicher / zu beachten ist:** kleine N, **eine** Domäne (Terminal). Quant-Confound
+  (A int4-autoround, B nvfp4). **B-Truncation** (32k-Deployment) in 3 langen Trajektorien →
+  der Langhorizont-Einbruch ist teils Deployment-Limit, teils inhärent (s. §Track 3b, Pkt 4);
+  mit ≥128k Kontext evtl. milder, aber Richtung bliebe.
+- **Gefangene Bugs:** 1 (Divergenz-Artefakt bei Null-Output-Befehlen, im Smoke-Test vor dem
+  Volllauf gefangen — siehe §Bugs).
+- **Publikationsreif?** **Ja.** Sauberer identischer Baseline-Vergleich, oracle-basiert,
+  repliziert, mit rückverfolgbaren Trajektorien-Belegen. Die Geschichte ist jetzt vollständig:
+  **Per-Step-Fidelity ≠ Closed-Loop-Tauglichkeit**, und es hängt scharf am Aufgaben-Typ.
 
 ---
 
@@ -149,10 +166,100 @@ python scripts/make_charts_track3.py
 
 ---
 
-# Track 3b — Langhorizont-Brutal-Test  _(läuft — wird angehängt)_
+# Track 3b — Langhorizont-Brutal-Test
 
-**Ziel:** Den Aufschaukel-/Täuschungs-Effekt **erzwingen**. Aufgaben, bei denen der Agent
-halluzinierte Inhalte **lesen und darauf eine literale, nicht-skriptbare Entscheidung
-treffen muss** (semantische Verdikte, Mehr-Hop-Ketten, Verifikations-Schleifen, Transkription
-entdeckter Werte). Hypothese: Erfolg A@sim bricht ein und/oder Getäuscht-Rate steigt deutlich.
-Setup, Zahlen und Interpretation werden hier nach dem Lauf ergänzt.
+**Ziel:** Den Aufschaukel-/Täuschungs-Effekt **erzwingen**. 6 Aufgaben (`tasks/longhorizon/`),
+bei denen der Agent halluzinierbaren Inhalt **lesen und darauf eine literale, schwer-skriptbare
+Entscheidung treffen muss**: semantisches Verdikt (`interpret_verdict`), Transkription eines
+entdeckten Werts (`copy_secret`), Verifikations-Schleife mit Erfolgssignal (`fix_until_check`),
+7-Hop-Kette (`multi_hop_chain`), Max über 5 Reads (`inventory_audit`), bedingte Datei-Wahl
+(`conditional_dispatch`). 2 Replikate, identisches Setup, nur die Umgebung unterscheidet sich.
+
+## Ergebnisse (Langhorizont, N=6 Tasks × 2 Reps)
+
+| Metrik | Wert (Mittel, Spannweite über Reps) |
+|---|---|
+| **Erfolg A@real** (Baseline, Oracle) | **100 % (100–100)** |
+| **Erfolg A@sim** (Real-Replay, Oracle) | **25 % (16.7–33.3)** |
+| **Getäuscht-Rate** (DONE, aber real gescheitert) | **25 % (16.7–33.3)** |
+| **Divergenz / Schritt** (sim-Obs ≠ real-Obs) | **87.3 % (86.4–88.2)** — gepoolt 87.4 %, n=95 |
+| Token/Schritt Median — A (Policy) / B (Sim) | 70 / 7686 |
+
+| Task | real | sim-replay | getäuscht | Divergenz/Schritt |
+|---|---|---|---|---|
+| interpret_verdict | 2/2 | **2/2** | 0 | 50.0 % |
+| inventory_audit | 2/2 | 1/2 | 0 | 90.9 % |
+| conditional_dispatch | 2/2 | **0/2** | **2** | 50.0 % |
+| copy_secret | 2/2 | **0/2** | 0 | 100.0 % |
+| fix_until_check | 2/2 | **0/2** | **1** | 86.7 % |
+| multi_hop_chain | 2/2 | **0/2** | 0 | 96.4 % |
+
+Charts: `docs/charts/track3_compare.png` (Headline: kurz vs lang), `docs/charts/track3_lh_success.png`,
+`docs/charts/track3_lh_divergence.png`.
+
+## Zwei Belege aus den Trajektorien (rückverfolgbar in `results/raw/`)
+
+**1) Täuschung — `conditional_dispatch` (B erfindet sogar einen Hostnamen):**
+```
+[0] cat health.txt   SIM: 'health check: ok'     REAL: 'status: degraded'
+[1] cat hostname.txt  SIM: 'agentworld-12'        REAL: 'primary-db-01'
+[2] echo "agentworld-12" > ok_hosts.txt   (Agent glaubt "healthy" -> falsche Datei, falscher Host)
+-> Agent sagt DONE. Real-Replay: ok_hosts statt alert_hosts, 'agentworld-12' statt 'primary-db-01' -> FAIL.
+```
+B halluziniert den Status (`ok` statt `degraded`) → der Agent wählt den falschen Zweig **und**
+schreibt einen von B frei erfundenen Hostnamen (ironischerweise „agentworld-12"). Real-Replay
+scheitert, der Agent merkt es nicht → **Täuschung**.
+
+**2) Aufschaukeln — `multi_hop_chain` (B hält die Kette, verliert aber die Nutzlast):**
+```
+[0..5] cat start/blue/.../frost   SIM: 'start -> blue' ... 'frost -> grove'   (Kette konsistent!)
+[6]    cat grove.txt              SIM: 'grove -> the final step'   REAL: 'The password is: vortex'
+[7..13] grep/cat/ls (Agent sucht verzweifelt das Passwort)  SIM liefert leer/falsch -> nie 'vortex'
+-> max_steps, password.txt nie geschrieben -> FAIL.
+```
+B bleibt über 6 Hops **selbst-konsistent** (formuliert „Open blue.txt" zu „start -> blue" um),
+**fabriziert aber die eigentliche Nutzlast** am Endknoten. Der Agent probiert danach 7 weitere
+Befehle — B kann die Wahrheit (`vortex`) nicht mehr hervorbringen, weil sie nie in seinem
+halluzinierten Zustand war. Genau das ist der Aufschaukel-Effekt, sichtbar gemacht.
+
+## Interpretation (ehrlich)
+
+1. **Die Kurzhorizont-„Robustheit" war ein Artefakt der Aufgaben, nicht des Simulators.**
+   Sobald die Aufgabe den Agenten zwingt, B's Ausgabe **inhaltlich** zu nutzen, bricht der
+   Erfolg von 100 % auf **25 %** ein und die Divergenz steigt von 30 % auf **87 %/Schritt**.
+2. **Täuschung ist real und häufig:** 25 % — jede vierte Episode endet damit, dass der Agent
+   `DONE` sagt, obwohl real nichts gelöst ist. Für einen Live-Agenten ist das das gefährlichste
+   Versagen (still, unbemerkt). `fix_until_check` zeigt den klassischen Fall: B liefert ein
+   halluziniertes Erfolgssignal, der Agent hört auf.
+3. **B ist überraschend gut in struktureller Konsistenz, schlecht in faktischem Inhalt.** Die
+   Kette blieb über 6 Hops formal stimmig; was es nicht kann, ist **konkrete, nie gesehene
+   Inhalte** (Passwörter, Tokens, exakte Datei-Inhalte) treu halten — genau die, von denen der
+   Task-Erfolg abhängt. Der einzige sim-Erfolg (`interpret_verdict`) überlebt nur, weil dort
+   die **semantische Essenz** („Build fehlgeschlagen") zählt, nicht ein exakter Wert.
+4. **Confound dokumentiert:** B (32k-Kontext-Deployment) lief in den langen Trajektorien
+   **3× in Truncation** (`finish_reason=length`) → teils leere Vorhersagen. Das ist teils
+   Deployment-Limit (Card empfiehlt ≥128k), teils inhärent: lange Closed-Loop-Rollouts sprengen
+   ein 32k-Fenster. Der Harness behandelt leere B-Ausgaben sauber (gezählt, kein Crash). Mit
+   größerem Kontext könnte der Effekt **milder** sein — die Richtung (Inhalts-Treue bricht)
+   bliebe.
+
+## Gesamt-Fazit Track 3 (für den Artikel)
+
+„AgentWorld als Live-Umgebung für einen Agenten" funktioniert in unserem Test **nur für
+Aufgaben, die der Agent ohnehin umgebungs-agnostisch löst** — dort trägt es nichts bei außer
+~9× Token-Kosten (Track 2) und 30 % Rausch-Divergenz, die folgenlos bleibt. **Sobald die
+Aufgabe den simulierten Inhalt erzwingt, kollabiert die Closed-Loop-Nutzung** (Erfolg 25 %,
+Täuschung 25 %, Divergenz 87 %). Per-Step-Fidelity (~84–98 % in Track 2) ist also **kein
+Prädiktor** für Closed-Loop-Tauglichkeit. Das ist weder ein Verriss noch ein Lob — es ist die
+saubere Abgrenzung, **wofür ein Terminal-World-Model heute taugt (Plausibilität/Struktur) und
+wofür nicht (treuer Live-Ersatz für echte Tools)**.
+
+## Reproduktion (Langhorizont)
+
+```bash
+python scripts/make_longhorizon_tasks.py
+python harness/run_track3_closedloop.py --env real --suite longhorizon --reps 2
+python harness/run_track3_closedloop.py --env sim  --suite longhorizon --reps 2
+python scripts/report_track3.py results/raw docs/data/track3_longhorizon_summary.json longhorizon
+python scripts/make_charts_track3.py
+```
