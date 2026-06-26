@@ -128,27 +128,36 @@ def main():
         model = C.get_model(model_key, cfg)
         rec = Recorder(track=2, model_key=model_key, model_id=model.model_id,
                        endpoint=model.endpoint, regime=regime.name, sampling=regime.params)
-        cli = C.Client(model, regime, recorder=rec)
+        # Timeout grosszuegig: Thinking AN + 32k-Budget -> einzelne Calls koennen
+        # >120s dauern (v.a. B remote, oder unter Last). 300s + nur 2 Retries.
+        cli = C.Client(model, regime, recorder=rec, timeout=300.0, max_retries=2)
         judge_cli = None
         if eff_judge_key:
             judge_model = C.get_model(eff_judge_key, cfg)
-            judge_cli = C.Client(judge_model, C.get_regime("greedy", cfg), recorder=rec)
+            judge_cli = C.Client(judge_model, C.get_regime("greedy", cfg),
+                                 recorder=rec, timeout=300.0, max_retries=2)
         self_flag = " (SELF-JUDGE!)" if eff_judge_key == model_key else ""
         print(f"  Modell {model_key}: Judge = {eff_judge_key or 'KEINER (nur deterministisch)'}{self_flag}")
 
         with rec:
             for t in triples:
-                prediction, _ = predict(cli, t, max_tok)
-                fact = G.score_factuality(prediction, t["truth"])
-                fmt = G.score_format(prediction, t.get("format_schema"))
-                jdg = judge(judge_cli, t, prediction, max_tok) if judge_cli else None
-                rec.log_result(
-                    triple_id=t["_id"], domain=t.get("domain"),
-                    prediction=prediction, factuality=fact, format=fmt, judge=jdg,
-                    judge_model=eff_judge_key,
-                )
-                print(f"  [{model_key}] {t['_id']}: fact={fact['factuality']} "
-                      f"fmt={fmt['format']}" + (f" judge={jdg}" if jdg else ""))
+                # Fehlertolerant: ein Triple-Fehler (Timeout etc.) killt nicht den Lauf.
+                try:
+                    prediction, _ = predict(cli, t, max_tok)
+                    fact = G.score_factuality(prediction, t["truth"])
+                    fmt = G.score_format(prediction, t.get("format_schema"))
+                    jdg = judge(judge_cli, t, prediction, max_tok) if judge_cli else None
+                    rec.log_result(
+                        triple_id=t["_id"], domain=t.get("domain"),
+                        prediction=prediction, factuality=fact, format=fmt, judge=jdg,
+                        judge_model=eff_judge_key,
+                    )
+                    print(f"  [{model_key}] {t['_id']}: fact={fact['factuality']} "
+                          f"fmt={fmt['format']}" + (f" judge={jdg}" if jdg else ""))
+                except Exception as e:  # noqa: BLE001 - bench: log & continue
+                    rec.log_result(triple_id=t["_id"], domain=t.get("domain"),
+                                   error=repr(e))
+                    print(f"  [{model_key}] {t['_id']}: FEHLER -> {e!r} (uebersprungen)")
         print(f"  -> {rec.path}")
 
 

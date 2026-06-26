@@ -69,6 +69,9 @@ def report_track2(runs):
     for h, res in runs:
         if h["track"] != 2:
             continue
+        res = [r for r in res if "factuality" in r]  # Fehler-Zeilen raus
+        if not res:
+            continue
         fact = mean([r["factuality"]["factuality"] for r in res])
         fmt = mean([r["format"]["format"] for r in res])
         con = mean([(r.get("judge") or {}).get("consistency") for r in res])
