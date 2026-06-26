@@ -94,8 +94,10 @@ def main():
     ap.add_argument("--tasks", default="tasks/")
     ap.add_argument("--filter", default=None, help="nur Triples, deren _id den String enthaelt")
     ap.add_argument("--judge", default=None,
-                    help="Modell-Key des Judges (Cross-Judging, kein Self-Judging). "
-                         "'none' = nur deterministische Scores.")
+                    help="Judge-Modus: 'none' (nur deterministisch) | 'cross' (jedes "
+                         "Modell vom jeweils anderen, NICHT vergleichbar) | <Key> = FIXED "
+                         "single judge: dieses eine Modell bewertet ALLE (vergleichbar; "
+                         "self-judge-Zeilen werden markiert). Default: none.")
     args = ap.parse_args()
 
     cfg = C.load_config()
@@ -109,14 +111,17 @@ def main():
     print(f"{len(triples)} Triples geladen{' (gefiltert: '+args.filter+')' if args.filter else ''}.")
 
     def pick_judge(model_key: str) -> str | None:
-        """Neutralen Judge wählen: nie das Modell selbst. Bei genau 2 Modellen ->
-        Cross-Judging (das jeweils andere). --judge none schaltet Judge ab."""
-        if args.judge == "none":
+        """Judge-Auswahl:
+        - None/'none' -> kein Judge (nur deterministisch).
+        - 'cross'     -> das jeweils ANDERE Modell (NICHT vergleichbar, nur Diagnostik).
+        - '<Key>'     -> FIXED single judge: dieser eine Key bewertet ALLE Modelle
+                         (vergleichbar; self-judge wenn Key==model_key, wird markiert)."""
+        if args.judge in (None, "none"):
             return None
-        if args.judge:
-            return None if args.judge == model_key else args.judge
-        others = [k for k in model_keys if k != model_key]
-        return others[0] if others else None
+        if args.judge == "cross":
+            others = [k for k in model_keys if k != model_key]
+            return others[0] if others else None
+        return args.judge  # fixed single judge fuer alle
 
     for model_key in model_keys:
         eff_judge_key = pick_judge(model_key)
@@ -128,7 +133,8 @@ def main():
         if eff_judge_key:
             judge_model = C.get_model(eff_judge_key, cfg)
             judge_cli = C.Client(judge_model, C.get_regime("greedy", cfg), recorder=rec)
-        print(f"  Modell {model_key}: Judge = {eff_judge_key or 'KEINER (nur deterministisch)'}")
+        self_flag = " (SELF-JUDGE!)" if eff_judge_key == model_key else ""
+        print(f"  Modell {model_key}: Judge = {eff_judge_key or 'KEINER (nur deterministisch)'}{self_flag}")
 
         with rec:
             for t in triples:

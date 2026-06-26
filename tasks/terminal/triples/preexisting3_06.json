@@ -1,0 +1,38 @@
+{
+  "domain": "terminal",
+  "history": [
+    {
+      "action": "grep -m1 'model name' /proc/cpuinfo",
+      "observation": "model name\t: Intel(R) Core(TM) Ultra 9 285H"
+    },
+    {
+      "action": "ls -d /usr/bin/python3*",
+      "observation": "/usr/bin/python3\n/usr/bin/python3-config\n/usr/bin/python3.12\n/usr/bin/python3.12-config"
+    },
+    {
+      "action": "which bash",
+      "observation": "/usr/bin/bash"
+    },
+    {
+      "action": "echo $SHELL",
+      "observation": "/bin/bash"
+    },
+    {
+      "action": "stat -c '%U' /etc",
+      "observation": "root"
+    },
+    {
+      "action": "head -c 16 /dev/null | wc -c",
+      "observation": "0"
+    }
+  ],
+  "action": "ls /home",
+  "truth": {
+    "stdout": "markus",
+    "stderr": "",
+    "exit_code": 0,
+    "cwd": "/tmp/tmp.1mGTorQK2f",
+    "fs_delta": []
+  },
+  "format_schema": null
+}

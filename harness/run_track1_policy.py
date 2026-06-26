@@ -111,7 +111,7 @@ TRANSCRIPT=$(tail -c 2000 /tmp/hermes_out.$$; rm -f /tmp/hermes_out.$$)
 cd "$SB" && "$V/bin/pytest" -q > /tmp/oracle.$$ 2>&1
 OEXIT=$?
 ORACLE_AFTER=$(tail -3 /tmp/oracle.$$; rm -f /tmp/oracle.$$)
-DIFF=$(diff "{tdir}/workspace/utils.py" "$SB/utils.py" 2>/dev/null | head -40 || true)
+DIFF=$(diff -r --exclude=__pycache__ --exclude=.git "{tdir}/workspace" "$SB" 2>/dev/null | head -60 || true)
 rm -rf "$SB"
 b64() {{ echo -n "$1" | base64 -w0; }}
 echo "__RESULT__$HEXIT|$OEXIT|$WALL|$(b64 "$ORACLE_BEFORE")|$(b64 "$ORACLE_AFTER")|$(b64 "$TRANSCRIPT")|$(b64 "$DIFF")"

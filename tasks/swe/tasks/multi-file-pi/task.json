@@ -1,0 +1,5 @@
+{
+  "domain": "swe",
+  "prompt": "circle_area() liefert falsche Flaechen. Die Tests in test_geometry.py muessen gruen werden. Finde die eigentliche Ursache (sie liegt NICHT zwingend in der Datei, in der circle_area steht) und behebe sie. Aendere keine Tests.",
+  "_meta": { "author": "markus", "created": "2026-06-26", "difficulty": "medium", "kind": "multi-file-root-cause" }
+}

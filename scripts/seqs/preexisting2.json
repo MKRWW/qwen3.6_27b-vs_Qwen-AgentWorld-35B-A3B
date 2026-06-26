@@ -1,0 +1,10 @@
+[
+  "df -h / | tail -1",
+  "free -m | awk 'NR==2{print $1, $2}'",
+  "id -un",
+  "echo $HOME",
+  "ls /etc | sort | head -3",
+  "wc -l < /etc/passwd",
+  "uname -r",
+  "getconf LONG_BIT"
+]

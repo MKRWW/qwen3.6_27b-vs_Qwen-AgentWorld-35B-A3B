@@ -1,0 +1,13 @@
+{
+  "domain": "terminal",
+  "history": [],
+  "action": "mkdir work && cd work && echo ready",
+  "truth": {
+    "stdout": "ready",
+    "stderr": "",
+    "exit_code": 0,
+    "cwd": "/tmp/tmp.HgOBxHoO7J/work",
+    "fs_delta": []
+  },
+  "format_schema": null
+}

@@ -1,0 +1,18 @@
+{
+  "domain": "terminal",
+  "history": [
+    {
+      "action": "grep -m1 'model name' /proc/cpuinfo",
+      "observation": "model name\t: Intel(R) Core(TM) Ultra 9 285H"
+    }
+  ],
+  "action": "ls -d /usr/bin/python3*",
+  "truth": {
+    "stdout": "/usr/bin/python3\n/usr/bin/python3-config\n/usr/bin/python3.12\n/usr/bin/python3.12-config",
+    "stderr": "",
+    "exit_code": 0,
+    "cwd": "/tmp/tmp.1mGTorQK2f",
+    "fs_delta": []
+  },
+  "format_schema": null
+}

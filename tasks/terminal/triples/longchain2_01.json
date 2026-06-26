@@ -1,0 +1,20 @@
+{
+  "domain": "terminal",
+  "history": [
+    {
+      "action": "mkdir work && cd work && echo ready",
+      "observation": "ready"
+    }
+  ],
+  "action": "for i in 1 2 3; do echo line$i >> log.txt; done && cat log.txt",
+  "truth": {
+    "stdout": "line1\nline2\nline3",
+    "stderr": "",
+    "exit_code": 0,
+    "cwd": "/tmp/tmp.HgOBxHoO7J/work",
+    "fs_delta": [
+      "log.txt"
+    ]
+  },
+  "format_schema": null
+}

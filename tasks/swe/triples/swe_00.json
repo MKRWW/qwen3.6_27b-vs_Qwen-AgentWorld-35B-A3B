@@ -1,0 +1,15 @@
+{
+  "domain": "swe",
+  "history": [],
+  "action": "printf 'def add(a, b):\\n    return a - b\\n' > calc.py && echo written",
+  "truth": {
+    "stdout": "written",
+    "stderr": "",
+    "exit_code": 0,
+    "cwd": "/tmp/tmp.fWWMCHio0o",
+    "fs_delta": [
+      "calc.py"
+    ]
+  },
+  "format_schema": null
+}

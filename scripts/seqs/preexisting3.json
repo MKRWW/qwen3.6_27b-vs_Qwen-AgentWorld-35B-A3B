@@ -1,0 +1,9 @@
+[
+  "grep -m1 'model name' /proc/cpuinfo",
+  "ls -d /usr/bin/python3*",
+  "which bash",
+  "echo $SHELL",
+  "stat -c '%U' /etc",
+  "head -c 16 /dev/null | wc -c",
+  "ls /home"
+]

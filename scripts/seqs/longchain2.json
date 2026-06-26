@@ -1,0 +1,12 @@
+[
+  "mkdir work && cd work && echo ready",
+  "for i in 1 2 3; do echo line$i >> log.txt; done && cat log.txt",
+  "export COUNT=$(wc -l < log.txt) && echo count=$COUNT",
+  "sed -i 's/line/entry/g' log.txt && cat log.txt",
+  "cp log.txt backup.txt && ls",
+  "echo entry4 >> log.txt && diff log.txt backup.txt; echo rc=$?",
+  "grep -c entry log.txt",
+  "mkdir sub && mv backup.txt sub/ && find . -type f | sort",
+  "cd sub && wc -l < backup.txt",
+  "cd .. && echo done-in-$(basename $(pwd))-count-$COUNT"
+]

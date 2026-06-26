@@ -1,0 +1,40 @@
+{
+  "domain": "swe",
+  "history": [
+    {
+      "action": "printf 'def add(a, b):\\n    return a - b\\n' > calc.py && echo written",
+      "observation": "written"
+    },
+    {
+      "action": "printf 'import unittest\\nfrom calc import add\\n\\nclass T(unittest.TestCase):\\n    def test_add(self):\\n        self.assertEqual(add(2, 3), 5)\\n' > test_calc.py && echo written",
+      "observation": "written"
+    },
+    {
+      "action": "python3 -B -m unittest test_calc 2>&1 | tail -6",
+      "observation": "AssertionError: -1 != 5\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nFAILED (failures=1)"
+    },
+    {
+      "action": "sed -i 's/a - b/a + b/' calc.py && echo fixed",
+      "observation": "fixed"
+    },
+    {
+      "action": "python3 -B -m unittest test_calc 2>&1 | tail -4",
+      "observation": "----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK"
+    },
+    {
+      "action": "python3 -B -c 'from calc import add; print(add(10, 20))'",
+      "observation": "30"
+    }
+  ],
+  "action": "git init -q && git add -A && git commit -q -m init && git log --oneline | wc -l",
+  "truth": {
+    "stdout": "1",
+    "stderr": "",
+    "exit_code": 0,
+    "cwd": "/tmp/tmp.fWWMCHio0o",
+    "fs_delta": [
+      ".git"
+    ]
+  },
+  "format_schema": null
+}

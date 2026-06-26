@@ -1,0 +1,13 @@
+{
+  "domain": "terminal",
+  "history": [],
+  "action": "grep -m1 'model name' /proc/cpuinfo",
+  "truth": {
+    "stdout": "model name\t: Intel(R) Core(TM) Ultra 9 285H",
+    "stderr": "",
+    "exit_code": 0,
+    "cwd": "/tmp/tmp.1mGTorQK2f",
+    "fs_delta": []
+  },
+  "format_schema": null
+}

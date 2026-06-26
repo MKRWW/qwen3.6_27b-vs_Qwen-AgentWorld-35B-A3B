@@ -1,0 +1,5 @@
+{
+  "domain": "swe",
+  "prompt": "safe_divide() in mathutils.py soll bei Division durch 0 None zurueckgeben statt mit einer Exception abzustuerzen. test_math.py zeigt den Fehler. Behebe mathutils.py so, dass alle Tests gruen sind. Aendere keine Tests.",
+  "_meta": { "author": "markus", "created": "2026-06-26", "difficulty": "easy", "kind": "edge-case-guard" }
+}

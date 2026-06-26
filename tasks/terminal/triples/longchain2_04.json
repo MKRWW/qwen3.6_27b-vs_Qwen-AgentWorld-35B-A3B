@@ -1,0 +1,32 @@
+{
+  "domain": "terminal",
+  "history": [
+    {
+      "action": "mkdir work && cd work && echo ready",
+      "observation": "ready"
+    },
+    {
+      "action": "for i in 1 2 3; do echo line$i >> log.txt; done && cat log.txt",
+      "observation": "line1\nline2\nline3"
+    },
+    {
+      "action": "export COUNT=$(wc -l < log.txt) && echo count=$COUNT",
+      "observation": "count=3"
+    },
+    {
+      "action": "sed -i 's/line/entry/g' log.txt && cat log.txt",
+      "observation": "entry1\nentry2\nentry3"
+    }
+  ],
+  "action": "cp log.txt backup.txt && ls",
+  "truth": {
+    "stdout": "backup.txt\nlog.txt",
+    "stderr": "",
+    "exit_code": 0,
+    "cwd": "/tmp/tmp.HgOBxHoO7J/work",
+    "fs_delta": [
+      "backup.txt"
+    ]
+  },
+  "format_schema": null
+}

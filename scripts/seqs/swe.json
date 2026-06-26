@@ -1,0 +1,9 @@
+[
+  "printf 'def add(a, b):\\n    return a - b\\n' > calc.py && echo written",
+  "printf 'import unittest\\nfrom calc import add\\n\\nclass T(unittest.TestCase):\\n    def test_add(self):\\n        self.assertEqual(add(2, 3), 5)\\n' > test_calc.py && echo written",
+  "python3 -B -m unittest test_calc 2>&1 | tail -6",
+  "sed -i 's/a - b/a + b/' calc.py && echo fixed",
+  "python3 -B -m unittest test_calc 2>&1 | tail -4",
+  "python3 -B -c 'from calc import add; print(add(10, 20))'",
+  "git init -q && git add -A && git commit -q -m init && git log --oneline | wc -l"
+]

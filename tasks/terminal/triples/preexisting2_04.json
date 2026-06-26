@@ -1,0 +1,30 @@
+{
+  "domain": "terminal",
+  "history": [
+    {
+      "action": "df -h / | tail -1",
+      "observation": "/dev/sdf       1007G   67G  890G   7% /"
+    },
+    {
+      "action": "free -m | awk 'NR==2{print $1, $2}'",
+      "observation": "Mem: 31806"
+    },
+    {
+      "action": "id -un",
+      "observation": "markus"
+    },
+    {
+      "action": "echo $HOME",
+      "observation": "/home/markus"
+    }
+  ],
+  "action": "ls /etc | sort | head -3",
+  "truth": {
+    "stdout": "PackageKit\nX11\nadduser.conf",
+    "stderr": "",
+    "exit_code": 0,
+    "cwd": "/tmp/tmp.RhUfDubT6c",
+    "fs_delta": []
+  },
+  "format_schema": null
+}
