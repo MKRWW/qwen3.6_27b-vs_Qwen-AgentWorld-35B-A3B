@@ -1,0 +1,12 @@
+[
+  "mkdir lab && cd lab && echo start",
+  "printf 'alpha\\n' > a.txt && printf 'beta\\n' > b.txt && ls",
+  "export PROJ=demo && echo $PROJ",
+  "mkdir -p $PROJ/src && echo created",
+  "cat a.txt b.txt",
+  "cp a.txt $PROJ/src/a_copy.txt && find . -name '*.txt' | sort",
+  "printf 'gamma\\n' >> a.txt && cat a.txt",
+  "wc -l a.txt b.txt",
+  "cd $PROJ/src && pwd && ls",
+  "cd ../.. && echo proj=$PROJ here=$(basename $(pwd))"
+]

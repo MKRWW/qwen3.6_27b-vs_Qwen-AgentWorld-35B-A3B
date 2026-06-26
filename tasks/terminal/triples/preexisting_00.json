@@ -1,0 +1,13 @@
+{
+  "domain": "terminal",
+  "history": [],
+  "action": "python3 --version",
+  "truth": {
+    "stdout": "Python 3.12.3",
+    "stderr": "",
+    "exit_code": 0,
+    "cwd": "/tmp/tmp.TxKBhvYDl1",
+    "fs_delta": []
+  },
+  "format_schema": null
+}

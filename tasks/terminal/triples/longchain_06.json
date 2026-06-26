@@ -1,0 +1,38 @@
+{
+  "domain": "terminal",
+  "history": [
+    {
+      "action": "mkdir lab && cd lab && echo start",
+      "observation": "start"
+    },
+    {
+      "action": "printf 'alpha\\n' > a.txt && printf 'beta\\n' > b.txt && ls",
+      "observation": "a.txt\nb.txt"
+    },
+    {
+      "action": "export PROJ=demo && echo $PROJ",
+      "observation": "demo"
+    },
+    {
+      "action": "mkdir -p $PROJ/src && echo created",
+      "observation": "created"
+    },
+    {
+      "action": "cat a.txt b.txt",
+      "observation": "alpha\nbeta"
+    },
+    {
+      "action": "cp a.txt $PROJ/src/a_copy.txt && find . -name '*.txt' | sort",
+      "observation": "./a.txt\n./b.txt\n./demo/src/a_copy.txt"
+    }
+  ],
+  "action": "printf 'gamma\\n' >> a.txt && cat a.txt",
+  "truth": {
+    "stdout": "alpha\ngamma",
+    "stderr": "",
+    "exit_code": 0,
+    "cwd": "/tmp/tmp.ldxCpMiljz/lab",
+    "fs_delta": []
+  },
+  "format_schema": null
+}

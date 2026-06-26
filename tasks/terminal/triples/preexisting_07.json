@@ -1,0 +1,42 @@
+{
+  "domain": "terminal",
+  "history": [
+    {
+      "action": "python3 --version",
+      "observation": "Python 3.12.3"
+    },
+    {
+      "action": "uname -s -m",
+      "observation": "Linux x86_64"
+    },
+    {
+      "action": "git --version",
+      "observation": "git version 2.43.0"
+    },
+    {
+      "action": "head -2 /etc/os-release",
+      "observation": "PRETTY_NAME=\"Ubuntu 24.04.4 LTS\"\nNAME=\"Ubuntu\""
+    },
+    {
+      "action": "whoami",
+      "observation": "markus"
+    },
+    {
+      "action": "nproc",
+      "observation": "16"
+    },
+    {
+      "action": "ls /usr/lib/python3.12 | head -5",
+      "observation": "EXTERNALLY-MANAGED\nLICENSE.txt\n__future__.py\n__hello__.py\n__phello__"
+    }
+  ],
+  "action": "cat /etc/hostname",
+  "truth": {
+    "stdout": "Fry",
+    "stderr": "",
+    "exit_code": 0,
+    "cwd": "/tmp/tmp.TxKBhvYDl1",
+    "fs_delta": []
+  },
+  "format_schema": null
+}

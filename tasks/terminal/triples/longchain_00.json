@@ -1,0 +1,13 @@
+{
+  "domain": "terminal",
+  "history": [],
+  "action": "mkdir lab && cd lab && echo start",
+  "truth": {
+    "stdout": "start",
+    "stderr": "",
+    "exit_code": 0,
+    "cwd": "/tmp/tmp.ldxCpMiljz/lab",
+    "fs_delta": []
+  },
+  "format_schema": null
+}

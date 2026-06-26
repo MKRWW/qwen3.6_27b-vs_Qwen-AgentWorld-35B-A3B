@@ -80,9 +80,11 @@ def predict(cli: C.Client, triple: dict, max_tokens: int) -> tuple[str, dict]:
 
 def judge(judge_cli: C.Client, triple: dict, prediction: str, max_tokens: int) -> dict:
     msgs = G.build_judge_messages(
-        triple.get("history", []), triple["action"], triple["truth"], prediction)
+        triple.get("history", []), triple["action"], triple["truth"], prediction,
+        domain=triple.get("domain", "terminal"))
+    # Judge soll NICHT denken (will direktes JSON) -> enable_thinking aus.
     resp = judge_cli.chat(msgs, max_tokens=max_tokens, enable_thinking=False)
-    return G.parse_judge(C.first_text(resp))
+    return G.parse_judge(_strip_think(C.first_text(resp)))
 
 
 def main():
@@ -90,6 +92,7 @@ def main():
     ap.add_argument("--models", default="A,B")
     ap.add_argument("--regime", default="greedy")
     ap.add_argument("--tasks", default="tasks/")
+    ap.add_argument("--filter", default=None, help="nur Triples, deren _id den String enthaelt")
     ap.add_argument("--judge", default=None,
                     help="Modell-Key des Judges (Cross-Judging, kein Self-Judging). "
                          "'none' = nur deterministische Scores.")
@@ -100,7 +103,10 @@ def main():
     max_tok = cfg["max_tokens"]["track2_worldmodel"]
     model_keys = args.models.split(",")
     triples = load_triples(args.tasks)
-    print(f"{len(triples)} Triples geladen.")
+    if args.filter:
+        subs = [s for s in args.filter.split(",") if s]
+        triples = [t for t in triples if any(s in t["_id"] for s in subs)]
+    print(f"{len(triples)} Triples geladen{' (gefiltert: '+args.filter+')' if args.filter else ''}.")
 
     def pick_judge(model_key: str) -> str | None:
         """Neutralen Judge wählen: nie das Modell selbst. Bei genau 2 Modellen ->

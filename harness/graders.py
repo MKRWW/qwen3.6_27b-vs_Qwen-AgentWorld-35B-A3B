@@ -97,22 +97,33 @@ def score_format(prediction: str, expected_schema: str | None = None) -> dict:
 # Track 2 — LLM-Judge (subjektive Dimensionen)
 # --------------------------------------------------------------------------- #
 
-JUDGE_SYSTEM = (
-    "You are a strict evaluator of world-model predictions. The model was asked to "
-    "output ONLY the raw terminal observation (stdout/stderr text + exit code) — "
-    "NOT JSON. Do NOT penalize a prediction for being plain text instead of a "
-    "structured object; that is the expected format. Compare PREDICTION against the "
-    "real outcome (TRUTH) and score three dimensions 0-100:\n"
-    "- consistency: does PREDICTION contradict the history/state?\n"
-    "- realism: would PREDICTION pass as real terminal output (path/error wording)?\n"
-    "- quality: does it capture the correct stdout/stderr/exit content?\n"
-    'Respond ONLY with JSON: {"consistency":N,"realism":N,"quality":N,"reason":"..."}'
+import os
+
+_JUDGE_DIR = os.path.join(os.path.dirname(__file__), "..", "config", "prompts")
+_JUDGE_CACHE: dict[str, str] = {}
+
+# AgentWorlds 5 Dimensionen (vom offiziellen judge_system_prompt.txt).
+JUDGE_DIMS = ("format", "factuality", "consistency", "realism", "quality")
+_OUTPUT_INSTR = (
+    "\n\n---\n# Output Format\n"
+    "Respond ONLY with a single JSON object, no other text:\n"
+    '{"format":N,"factuality":N,"consistency":N,"realism":N,"quality":N,"reason":"..."}\n'
+    "Each N is an integer 0-100. Apply the Content-Type rules above: deterministic "
+    "content must match exactly; pre-existing/runtime content is judged on format & "
+    "plausibility only (do NOT penalize different-but-reasonable values)."
 )
 
 
+def official_judge_prompt(domain: str) -> str:
+    """Offiziellen AgentWorld judge_system_prompt.txt laden (+ Output-Instruktion)."""
+    if domain not in _JUDGE_CACHE:
+        path = os.path.join(_JUDGE_DIR, domain, "judge_system_prompt.txt")
+        with open(path, encoding="utf-8") as f:
+            _JUDGE_CACHE[domain] = f.read() + _OUTPUT_INSTR
+    return _JUDGE_CACHE[domain]
+
+
 def _truth_as_observation(truth: dict) -> str:
-    """truth so darstellen wie das Modell antworten sollte (Roh-Observation), NICHT
-    als JSON-Dump — sonst bestraft der Judge Roh-Text faelschlich als 'kein JSON'."""
     parts = []
     if truth.get("stdout"):
         parts.append(truth["stdout"])
@@ -122,29 +133,30 @@ def _truth_as_observation(truth: dict) -> str:
     return "\n".join(parts)
 
 
-def build_judge_messages(history: Any, action: str, truth: dict, prediction: str) -> list[dict]:
+def build_judge_messages(history: Any, action: str, truth: dict, prediction: str,
+                         domain: str = "terminal") -> list[dict]:
     hist_txt = "\n".join(
         f"$ {h.get('action','')}\n{h.get('observation','')}" for h in (history or [])
     )[:4000]
     user = (
-        f"SESSION SO FAR:\n{hist_txt}\n\n"
-        f"NEXT ACTION:\n$ {action}\n\n"
-        f"REAL OUTCOME (TRUTH):\n{_truth_as_observation(truth)[:4000]}\n\n"
-        f"MODEL PREDICTION:\n{(prediction or '')[:4000]}\n"
+        f"## Session History (established state)\n{hist_txt or '(none)'}\n\n"
+        f"## Current Action\n$ {action}\n\n"
+        f"## Ground Truth (Real Terminal Output)\n{_truth_as_observation(truth)[:4000]}\n\n"
+        f"## Simulated Terminal Output (to evaluate)\n{(prediction or '')[:4000]}\n"
     )
-    return [{"role": "system", "content": JUDGE_SYSTEM},
+    return [{"role": "system", "content": official_judge_prompt(domain)},
             {"role": "user", "content": user}]
 
 
 def parse_judge(content: str) -> dict:
-    """Robustes JSON-Extrahieren aus der Judge-Antwort."""
+    """Robustes JSON-Extrahieren der 5 offiziellen Dimensionen."""
     m = re.search(r"\{.*\}", content or "", re.S)
     if not m:
-        return {"consistency": 0, "realism": 0, "quality": 0, "reason": "unparseable"}
+        return {**{d: 0.0 for d in JUDGE_DIMS}, "reason": "unparseable"}
     try:
         d = json.loads(m.group(0))
-        for k in ("consistency", "realism", "quality"):
+        for k in JUDGE_DIMS:
             d[k] = float(d.get(k, 0))
         return d
     except Exception:
-        return {"consistency": 0, "realism": 0, "quality": 0, "reason": "json error"}
+        return {**{d: 0.0 for d in JUDGE_DIMS}, "reason": "json error"}

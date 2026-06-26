@@ -1,0 +1,10 @@
+[
+  "python3 --version",
+  "uname -s -m",
+  "git --version",
+  "head -2 /etc/os-release",
+  "whoami",
+  "nproc",
+  "ls /usr/lib/python3.12 | head -5",
+  "cat /etc/hostname"
+]

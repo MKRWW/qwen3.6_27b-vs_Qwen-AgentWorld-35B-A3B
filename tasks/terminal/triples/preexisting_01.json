@@ -1,0 +1,18 @@
+{
+  "domain": "terminal",
+  "history": [
+    {
+      "action": "python3 --version",
+      "observation": "Python 3.12.3"
+    }
+  ],
+  "action": "uname -s -m",
+  "truth": {
+    "stdout": "Linux x86_64",
+    "stderr": "",
+    "exit_code": 0,
+    "cwd": "/tmp/tmp.TxKBhvYDl1",
+    "fs_delta": []
+  },
+  "format_schema": null
+}

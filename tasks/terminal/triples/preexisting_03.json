@@ -1,0 +1,26 @@
+{
+  "domain": "terminal",
+  "history": [
+    {
+      "action": "python3 --version",
+      "observation": "Python 3.12.3"
+    },
+    {
+      "action": "uname -s -m",
+      "observation": "Linux x86_64"
+    },
+    {
+      "action": "git --version",
+      "observation": "git version 2.43.0"
+    }
+  ],
+  "action": "head -2 /etc/os-release",
+  "truth": {
+    "stdout": "PRETTY_NAME=\"Ubuntu 24.04.4 LTS\"\nNAME=\"Ubuntu\"",
+    "stderr": "",
+    "exit_code": 0,
+    "cwd": "/tmp/tmp.TxKBhvYDl1",
+    "fs_delta": []
+  },
+  "format_schema": null
+}

@@ -1,0 +1,21 @@
+{
+  "domain": "terminal",
+  "history": [
+    {
+      "action": "mkdir lab && cd lab && echo start",
+      "observation": "start"
+    }
+  ],
+  "action": "printf 'alpha\\n' > a.txt && printf 'beta\\n' > b.txt && ls",
+  "truth": {
+    "stdout": "a.txt\nb.txt",
+    "stderr": "",
+    "exit_code": 0,
+    "cwd": "/tmp/tmp.ldxCpMiljz/lab",
+    "fs_delta": [
+      "a.txt",
+      "b.txt"
+    ]
+  },
+  "format_schema": null
+}
