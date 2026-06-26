@@ -35,12 +35,9 @@ for r in $(seq 1 "$REPS"); do
 done
 
 echo "###################################################################"
-echo "# 2/4  Track 1 (Policy/hermes) — $REPS Replikate, alle SWE-Tasks"
+echo "# 2/4  Track 1 (Policy/hermes) — 1 Lauf (pass/fail, kaum Varianz)"
 echo "###################################################################"
-for r in $(seq 1 "$REPS"); do
-  echo "----- Track 1 Replikat $r/$REPS -----"
-  python harness/run_track1_policy.py --models A,B --regime greedy --tasks tasks/
-done
+python harness/run_track1_policy.py --models A,B --regime greedy --tasks tasks/
 
 echo "###################################################################"
 echo "# 3/4  Aggregation"
