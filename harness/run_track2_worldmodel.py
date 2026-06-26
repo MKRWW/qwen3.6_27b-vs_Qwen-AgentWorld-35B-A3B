@@ -144,16 +144,26 @@ def main():
                 # Fehlertolerant: ein Triple-Fehler (Timeout etc.) killt nicht den Lauf.
                 try:
                     prediction, _ = predict(cli, t, max_tok)
+                    is_empty = not prediction.strip()
                     fact = G.score_factuality(prediction, t["truth"])
                     fmt = G.score_format(prediction, t.get("format_schema"))
-                    jdg = judge(judge_cli, t, prediction, 512) if judge_cli else None
+                    # WICHTIG: leere Vorhersage NICHT judgen (Judge halluziniert sonst
+                    # "matches exactly") -> hart 0. Empty-Rate ist eigene Metrik.
+                    if judge_cli is None:
+                        jdg = None
+                    elif is_empty:
+                        jdg = {**{d: 0.0 for d in G.JUDGE_DIMS}, "reason": "leere Vorhersage"}
+                    else:
+                        jdg = judge(judge_cli, t, prediction, 512)
                     rec.log_result(
                         triple_id=t["_id"], domain=t.get("domain"),
-                        prediction=prediction, factuality=fact, format=fmt, judge=jdg,
+                        prediction=prediction, empty=is_empty,
+                        factuality=fact, format=fmt, judge=jdg,
                         judge_model=eff_judge_key,
                     )
                     print(f"  [{model_key}] {t['_id']}: fact={fact['factuality']} "
-                          f"fmt={fmt['format']}" + (f" judge={jdg}" if jdg else ""))
+                          f"fmt={fmt['format']}{' EMPTY' if is_empty else ''}"
+                          + (f" judge={jdg}" if jdg and not is_empty else ""))
                 except Exception as e:  # noqa: BLE001 - bench: log & continue
                     rec.log_result(triple_id=t["_id"], domain=t.get("domain"),
                                    error=repr(e))

@@ -77,14 +77,18 @@ def main():
                 t = triples.get(tid)
                 if not t:
                     continue
-                msgs = G.build_judge_messages(t.get("history", []), t["action"],
-                                              t["truth"], preds[tid],
-                                              domain=t.get("domain", "terminal"))
-                try:
-                    resp = judge_cli.chat(msgs, max_tokens=args.max_tokens)
-                    j = G.parse_judge(C.first_text(resp))
-                except Exception as e:  # noqa: BLE001
-                    j = {**{d: None for d in G.JUDGE_DIMS}, "reason": f"err: {e!r}"}
+                if not (preds[tid] or "").strip():
+                    # leere Vorhersage NICHT judgen (Judge halluziniert sonst) -> 0
+                    j = {**{d: 0.0 for d in G.JUDGE_DIMS}, "reason": "leere Vorhersage"}
+                else:
+                    msgs = G.build_judge_messages(t.get("history", []), t["action"],
+                                                  t["truth"], preds[tid],
+                                                  domain=t.get("domain", "terminal"))
+                    try:
+                        resp = judge_cli.chat(msgs, max_tokens=args.max_tokens)
+                        j = G.parse_judge(C.first_text(resp))
+                    except Exception as e:  # noqa: BLE001
+                        j = {**{d: None for d in G.JUDGE_DIMS}, "reason": f"err: {e!r}"}
                 rec.log_result(triple_id=tid, model=mk, domain=t.get("domain"),
                                judge=j, judge_model=args.judge)
                 for d in G.JUDGE_DIMS:

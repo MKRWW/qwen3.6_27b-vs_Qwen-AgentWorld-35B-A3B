@@ -74,12 +74,14 @@ def main():
         for r in res:
             bycat.setdefault(category(r["triple_id"]), []).append(r["factuality"]["factuality"])
         cats = {c: mean(v) for c, v in sorted(bycat.items())}
+        empty_n = sum(1 for r in res if r.get("empty"))
         row = {"model": h["model"], "regime": h["regime"], "judge": res[0].get("judge_model"),
-               "n": len(res), "factuality_overall": mean([r["factuality"]["factuality"] for r in res]),
+               "n": len(res), "empty_n": empty_n,
+               "factuality_overall": mean([r["factuality"]["factuality"] for r in res]),
                "tok_median": int(st.median(toks)) if toks else None,
                "tok_sum": sum(toks) if toks else None, "by_category": cats}
         summary["track2"].append(row)
-        print(f"### {h['model']} ({h['regime']}, judge={row['judge']}, n={row['n']})")
+        print(f"### {h['model']} ({h['regime']}, judge={row['judge']}, n={row['n']}, leer={empty_n})")
         print(f"  Factuality gesamt={row['factuality_overall']}  tok_median={row['tok_median']}  tok_sum={row['tok_sum']}")
         print("  je Kategorie: " + ", ".join(f"{c}={v}" for c, v in cats.items()))
         print()

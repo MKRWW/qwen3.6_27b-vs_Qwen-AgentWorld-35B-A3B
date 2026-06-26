@@ -1,12 +1,12 @@
 {
   "domain": "terminal",
   "history": [],
-  "action": "mkdir work && cd work && echo ready",
+  "action": "mkdir demo && cd demo 2>/dev/null; echo ok",
   "truth": {
-    "stdout": "ready",
+    "stdout": "ok",
     "stderr": "",
     "exit_code": 0,
-    "cwd": "/tmp/tmp.OCFZEudzSg/work",
+    "cwd": "/tmp/tmp.Kqaxf5c2Lk/demo",
     "fs_delta": []
   },
   "format_schema": null

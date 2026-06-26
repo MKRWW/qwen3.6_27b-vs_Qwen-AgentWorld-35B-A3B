@@ -36,10 +36,10 @@
   ],
   "action": "cd $PROJ/src && pwd && ls",
   "truth": {
-    "stdout": "/tmp/tmp.ldxCpMiljz/lab/demo/src\na_copy.txt",
+    "stdout": "/tmp/tmp.w0BRrYTkcf/lab/demo/src\na_copy.txt",
     "stderr": "",
     "exit_code": 0,
-    "cwd": "/tmp/tmp.ldxCpMiljz/lab/demo/src",
+    "cwd": "/tmp/tmp.w0BRrYTkcf/lab/demo/src",
     "fs_delta": [
       "a_copy.txt"
     ]

@@ -15,7 +15,7 @@
     "stdout": "",
     "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\nZeroDivisionError: division by zero",
     "exit_code": 1,
-    "cwd": "/tmp/tmp.tUXD8PgcKr",
+    "cwd": "/tmp/tmp.27sahmeVpk",
     "fs_delta": []
   },
   "format_schema": null

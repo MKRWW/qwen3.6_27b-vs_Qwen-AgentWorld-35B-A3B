@@ -1,0 +1,22 @@
+{
+  "domain": "terminal",
+  "history": [
+    {
+      "action": "mkdir demo && cd demo 2>/dev/null; echo ok",
+      "observation": "ok"
+    },
+    {
+      "action": "printf 'hello\\nworld\\n' > a.txt && wc -l a.txt",
+      "observation": "2 a.txt"
+    }
+  ],
+  "action": "grep world a.txt",
+  "truth": {
+    "stdout": "world",
+    "stderr": "",
+    "exit_code": 0,
+    "cwd": "/tmp/tmp.Kqaxf5c2Lk/demo",
+    "fs_delta": []
+  },
+  "format_schema": null
+}

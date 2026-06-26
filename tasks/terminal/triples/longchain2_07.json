@@ -35,7 +35,7 @@
     "stdout": "./log.txt\n./sub/backup.txt",
     "stderr": "",
     "exit_code": 0,
-    "cwd": "/tmp/tmp.HgOBxHoO7J/work",
+    "cwd": "/tmp/tmp.OCFZEudzSg/work",
     "fs_delta": [
       "sub"
     ]
