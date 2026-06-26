@@ -101,6 +101,18 @@ Iteration (Test-Validität):
 - Lauf 32768: **A=98.3, B=98.3 (Genauigkeit identisch)**, aber B median **4348 vs 454
   completion_tokens → ~9× teurer** für dasselbe Ergebnis.
 
-**Fazit Track 2:** AgentWorld auf Terminal-Next-State nicht genauer, nur ~9× token-
-hungriger. ABER beide bei 98.3 = **Ceiling** → Aufgaben evtl. zu leicht; echter
-World-Model-Vorteil bräuchte pre-existing-State/lange Trajektorien/GUI-Domänen.
+**Fazit Track 2 (leicht):** nicht genauer, ~9× token-hungriger, beide 98.3 = Ceiling.
+
+## 2026-06-26 — Anti-Ceiling-Suite: erster echter B-Vorteil
+
+18 Triples (8 pre-existing „nur ratbar" + 10 long-chain „State über 10 Turns"),
+offizieller Judge verdrahtet. Cross-Judging erwies sich als unvergleichbar (A/B-Judges
+unterschiedlich streng bei Plausibilität) → **selbst neutral gejudged (Claude, gleiche
+Rubrik beide).**
+
+Befund: **moderater, realer Vorteil für B** dort, wofür ein World Model gebaut ist:
+- long-chain: B hält cwd korrekt (`here=lab`), A falsch (`here=demo`); B konsequent im
+  offiziellen Screen-Format, A teils nur nackter Output.
+- pre-existing-Plausibilität neutral: **B 3 : A 1 : 3 Gleichstand** (B sauberer bei
+  uname/git-Version/python-dir-listing; A besser bei os-release-Zeilenwahl).
+→ Kein „3× besser", aber der erste belastbare Edge — auf der Kern-Kompetenz. Siehe FINDINGS.

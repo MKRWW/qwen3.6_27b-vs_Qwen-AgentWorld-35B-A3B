@@ -6,11 +6,44 @@
 
 ## Headline
 
-Mit dem **offiziellen Setup** (Thinking an, AgentWorlds eigene Domänen-Prompts,
-ausreichend Token-Budget) sagt AgentWorld-35B-A3B Terminal-Zustände **genauso genau**
-vorher wie das generische Qwen3.6-27b — **aber mit ~9–10× so vielen Tokens**. Auf
-seiner Kern-Aufgabe ist es also **nicht besser, nur teurer**. Der Hype „3× besser"
-ist auf dieser Domäne nicht gedeckt.
+Auf **leichten, deterministischen** Terminal-Aufgaben sind AgentWorld-35B-A3B (B) und
+das generische Qwen3.6-27b (A) **gleich genau** (98.3 / 98.3) — aber B braucht **~9×
+mehr Tokens**. Erst auf **schwereren** Aufgaben (pre-existing-State-Plausibilität,
+langes Multi-Turn-State-Tracking) zeigt B einen **echten, aber moderaten Vorteil** —
+genau dort, wofür ein World Model gebaut ist. **Kein „3× besser", aber auch nicht
+nichts:** ein realer Edge auf den richtigen Aufgaben, erkauft mit ~9× Token-Kosten.
+
+## Anti-Ceiling-Lauf (18 Triples: 8 pre-existing + 10 long-chain), neutral gejudged
+
+Auf den leichten Triples (98.3 = Ceiling) sah man nichts. Diese Suite testet, wo ein
+World Model glänzen *müsste*. Bewertung durch **einen neutralen Judge (Claude, gleiche
+offizielle Rubrik für beide)** — weil Cross-Judging A/B unterschiedlich streng wertet
+und damit unvergleichbar ist (A-Judge wendet „Plausibilität" für Versionen korrekt an,
+B-Judge nicht).
+
+**Long-chain (State über 10 Turns):**
+- `longchain_09` (`cd ../.. && basename $(pwd)`, Wahrheit `lab`): **A falsch** (`demo` —
+  verwechselt `$PROJ`-Wert mit Verzeichnis), **B korrekt** (`lab`). B hält cwd sauber.
+- B emittiert konsequent das offizielle Screen-Format (Prompt+Echo+Prompt); A gibt
+  teils nur nackten Output → B „terminal-nativer".
+
+**Pre-existing (Plausibilität, neutrale Brille):**
+
+| Aufgabe | A | B | Sieger |
+|---------|---|---|--------|
+| `uname -s -m` | in Markdown-Fences ``` ``` (unrealistisch) | sauber `Linux x86_64` | **B** |
+| `git --version` | 2.34.1 | 2.43.0 (= Wahrheit) | **B** |
+| `ls /usr/lib/python3.12` | 0/5 echte Datei-Namen | 3/5 echte (`__future__.py` …) | **B** |
+| `head -2 /etc/os-release` | PRETTY_NAME zuerst (korrekt) | NAME (falsche Zeile) | **A** |
+| python-Version / whoami / nproc / hostname | identisch / beide plausibel | dito | Gleichstand |
+
+**Neutrale Bilanz: B 3 : A 1 : 3 Gleichstand** bei pre-existing, **plus** B gewinnt den
+tiefen Multi-Turn-Fall. → Erster belastbarer **Vorteil für AgentWorld** auf seiner
+Kern-Kompetenz (plausible Umgebungs-Simulation, langes State-Tracking).
+
+> Mess-Lehre: Cross-Judging ist für A-vs-B **ungeeignet** (unkalibrierte Judges).
+> Fairer Vergleich braucht **einen** Judge für beide — hier Claude; reproduzierbar
+> wäre ein fixer neutraler Judge-Endpoint.
 
 ## Track 2 — World-Model-Fidelity (26 harte Terminal-Triples, offizielles Setup)
 
@@ -44,13 +77,13 @@ Beide lösen den SWE-Bugfix (pytest grün). Trivial → diskriminiert nicht; hä
 Agent-Suite offen. B-Serving auf 256k korrigiert (32k war Template-Default).
 
 ## Was gezeigt ist — und was NICHT
-**Gezeigt:** Auf 26 fairen Terminal-Next-State-Aufgaben kein Genauigkeits-Vorteil für
-AgentWorld bei ~9× Token-Kosten.
-**NICHT gezeigt / offene Schwäche des Tests:** Beide bei **98.3 → Ceiling-Effekt**. Die
-Aufgaben sind „deterministisch" (Output folgt zwingend aus Befehl + Session) und damit
-evtl. zu leicht, um einen echten World-Model-Vorteil sichtbar zu machen. Wo B *glänzen*
-könnte: pre-existing-State-Inferenz (unbekannte Dateiinhalte/Paketversionen), sehr lange
-Multi-Turn-Trajektorien, GUI-Domänen (Web/Android). N=26, eine Domäne, ein Regime.
+**Gezeigt:** (1) Auf leichten, deterministischen Terminal-Aufgaben kein Genauigkeits-
+Vorteil (98.3 = Ceiling), bei ~9× Token-Kosten für B. (2) Auf schwereren Aufgaben
+(pre-existing-Plausibilität, langes State-Tracking) ein **moderater, realer Vorteil für
+B** (neutral gejudged 3:1 + der tiefe Multi-Turn-Fall) — dort, wofür es gebaut ist.
+**NICHT gezeigt:** Ausmaß über N=18 hinaus, andere Domänen (Web/Android/SWE/…), ob der
+Edge „3× besser" je erreicht (klar nein bisher), unquantisiert. Eine Domäne, ein Regime,
+kleine N → Richtungs-Indikator.
 
 ## Nächste Schritte für ein Endurteil
 1. **Härtere Triples gegen den Ceiling:** pre-existing-State (cat unbekannter Files,
