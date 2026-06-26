@@ -1,102 +1,112 @@
 {
-  "track2": [
-    {
-      "model": "A",
-      "regime": "card",
-      "judge": "J",
-      "n": 81,
-      "empty_n": 3,
-      "factuality_overall": 77.8,
-      "tok_median": 178,
-      "tok_sum": 83729,
-      "by_category": {
+  "models": {
+    "A": {
+      "replicates": 2,
+      "det_factuality": {
+        "mean": 77.4,
+        "min": 76.9,
+        "max": 77.8,
+        "n": 2
+      },
+      "judge_factuality": {
+        "mean": 83.2,
+        "min": 82.5,
+        "max": 83.8,
+        "n": 2
+      },
+      "empty_per_81": {
+        "mean": 3.5,
+        "min": 3,
+        "max": 4,
+        "n": 2
+      },
+      "tok_median": {
+        "mean": 510.0,
+        "min": 510,
+        "max": 510,
+        "n": 2
+      },
+      "by_category_det": {
         "errors": 92.9,
         "git": 100.0,
         "longchain": 97.5,
         "preexisting": 31.5,
         "python": 100.0,
         "stateful": 100.0,
-        "swe": 81.0,
+        "swe": 76.2,
         "terminal_basic": 100.0,
         "textproc": 100.0
-      }
-    },
-    {
-      "model": "A",
-      "regime": "card",
-      "judge": "J",
-      "n": 81,
-      "empty_n": 4,
-      "factuality_overall": 76.9,
-      "tok_median": 173,
-      "tok_sum": 99609,
-      "by_category": {
-        "errors": 92.9,
+      },
+      "by_category_judge": {
+        "errors": 96.7,
         "git": 100.0,
-        "longchain": 97.5,
-        "preexisting": 31.5,
-        "python": 100.0,
+        "longchain": 100.0,
+        "preexisting": 43.9,
+        "python": 90.0,
         "stateful": 100.0,
-        "swe": 71.4,
+        "swe": 100.0,
         "terminal_basic": 100.0,
         "textproc": 100.0
       }
     },
-    {
-      "model": "B",
-      "regime": "card",
-      "judge": "J",
-      "n": 81,
-      "empty_n": 0,
-      "factuality_overall": 77.8,
-      "tok_median": 283,
-      "tok_sum": 436572,
-      "by_category": {
-        "errors": 92.9,
+    "B": {
+      "replicates": 2,
+      "det_factuality": {
+        "mean": 79.4,
+        "min": 77.8,
+        "max": 81.1,
+        "n": 2
+      },
+      "judge_factuality": {
+        "mean": 83.7,
+        "min": 82.6,
+        "max": 84.9,
+        "n": 2
+      },
+      "empty_per_81": {
+        "mean": 0.5,
+        "min": 0,
+        "max": 1,
+        "n": 2
+      },
+      "tok_median": {
+        "mean": 4742.0,
+        "min": 4656,
+        "max": 4828,
+        "n": 2
+      },
+      "by_category_det": {
+        "errors": 84.5,
         "git": 100.0,
-        "longchain": 94.2,
-        "preexisting": 29.7,
-        "python": 100.0,
-        "stateful": 100.0,
-        "swe": 96.4,
-        "terminal_basic": 100.0,
-        "textproc": 100.0
-      }
-    },
-    {
-      "model": "B",
-      "regime": "card",
-      "judge": "J",
-      "n": 81,
-      "empty_n": 1,
-      "factuality_overall": 81.1,
-      "tok_median": 450,
-      "tok_sum": 437811,
-      "by_category": {
-        "errors": 76.2,
-        "git": 100.0,
-        "longchain": 97.5,
-        "preexisting": 42.8,
+        "longchain": 95.8,
+        "preexisting": 36.2,
         "python": 100.0,
         "stateful": 100.0,
         "swe": 96.4,
         "terminal_basic": 100.0,
         "textproc": 100.0
+      },
+      "by_category_judge": {
+        "errors": 96.7,
+        "git": 100.0,
+        "longchain": 100.0,
+        "preexisting": 42.7,
+        "python": 100.0,
+        "stateful": 100.0,
+        "swe": 100.0,
+        "terminal_basic": 100.0,
+        "textproc": 100.0
       }
     }
-  ],
-  "track1": [
-    {
-      "model": "A",
-      "regime": "greedy",
-      "n": 3,
-      "passed": 3
+  },
+  "track1": {
+    "A": {
+      "passed": 3,
+      "n": 3
     },
-    {
-      "model": "B",
-      "regime": "greedy",
-      "n": 3,
-      "passed": 3
+    "B": {
+      "passed": 3,
+      "n": 3
     }
-  ]
+  }
 }

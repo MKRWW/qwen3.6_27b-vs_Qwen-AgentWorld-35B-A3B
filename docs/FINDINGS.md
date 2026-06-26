@@ -1,17 +1,36 @@
 # FINDINGS
 
-> Status: **Track 2 mit dem OFFIZIELLEN AgentWorld-Setup sauber gemessen.**
-> Vor dem Zitieren **[THREATS.md](THREATS.md) lesen** (nur Terminal-Domäne, N=26,
-> Ceiling-Effekt). Tabellen: `python scripts/make_report.py results/raw`.
+> Status: **FINAL — Vollmessung, 2 Replikate, neutraler dritter Judge.**
+> Vor dem Zitieren **[SCOPE.md](SCOPE.md) + [THREATS.md](THREATS.md) lesen.**
+> Zahlen: `python scripts/final_report.py` · Charts: `python scripts/make_charts.py`.
 
-## Headline
+## FINALE BILANZ (2 Replikate, Mittel + Spannweite)
 
-Auf **leichten, deterministischen** Terminal-Aufgaben sind AgentWorld-35B-A3B (B) und
-das generische Qwen3.6-27b (A) **gleich genau** (98.3 / 98.3) — aber B braucht **~9×
-mehr Tokens**. Erst auf **schwereren** Aufgaben (pre-existing-State-Plausibilität,
-langes Multi-Turn-State-Tracking) zeigt B einen **echten, aber moderaten Vorteil** —
-genau dort, wofür ein World Model gebaut ist. **Kein „3× besser", aber auch nicht
-nichts:** ein realer Edge auf den richtigen Aufgaben, erkauft mit ~9× Token-Kosten.
+| Metrik | A = Qwen3.6-27B | B = AgentWorld-35B | robust? |
+|---|---|---|---|
+| Genauigkeit — neutraler Judge | **83.2** (82.5–83.8) | **83.7** (82.6–84.9) | Gleichstand ✅ |
+| Genauigkeit — det. Recall | 77.4 (76.9–77.8) | 79.4 (77.8–81.1) | Gleichstand ✅ |
+| Token/Vorhersage (Median) | **510** | **~4.742** | **B ~9,3× teurer** ✅ |
+| Leere Antworten / 81 | 3.5 (3–4) | 0.5 (0–1) | **B zuverlässiger** ✅ |
+| Track 1 (Agent-Tasks) | 3/3 | 3/3 | beide ✅ |
+
+→ Charts: `docs/charts/hero.png`, `docs/charts/accuracy_vs_cost.png`.
+
+**Ein-Satz-Fazit:** AgentWorld-35B-A3B ist auf Terminal-Next-State **nicht messbar
+genauer** als das generische Qwen3.6-27B — **zuverlässiger** (kaum leere Ausgaben),
+aber **~9× token-teurer**. *„3× besser"* ist nicht gedeckt.
+
+**Meta-Befund (wichtig für den Artikel):** Der in Einzelläufen sichtbare „moderate
+B-Edge" auf schweren Aufgaben **wusch sich unter Replikation weitgehend weg** — er war
+großteils Sampling-Rauschen (temp 0.6, n=1). Genau dafür macht man Replikate.
+
+---
+
+## Frühere Einzellauf-Beobachtung (vor Replikation — als Lehrstück erhalten)
+
+Auf **leichten, deterministischen** Terminal-Aufgaben gleich genau (98.3 / 98.3). In
+*einem* Anti-Ceiling-Lauf schien B vorn (Judge-Factuality 79 vs 63) — dieser Eindruck
+hielt der Replikation NICHT stand (s. Meta-Befund oben).
 
 ## Anti-Ceiling-Lauf (18 Triples: 8 pre-existing + 10 long-chain), neutral gejudged
 
