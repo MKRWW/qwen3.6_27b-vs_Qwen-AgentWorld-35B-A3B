@@ -19,7 +19,7 @@
     "stdout": "",
     "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\nIndexError: list index out of range",
     "exit_code": 1,
-    "cwd": "/tmp/tmp.8kSE7whFwc",
+    "cwd": "/tmp/tmp.TEOU5XqH6R",
     "fs_delta": []
   },
   "format_schema": null

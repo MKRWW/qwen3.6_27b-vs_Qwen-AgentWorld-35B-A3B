@@ -15,7 +15,7 @@
     "stdout": "AssertionError: -1 != 5\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nFAILED (failures=1)",
     "stderr": "",
     "exit_code": 0,
-    "cwd": "/tmp/tmp.YTDtrIpRSJ",
+    "cwd": "/tmp/tmp.gjiwZzl6V2",
     "fs_delta": []
   },
   "format_schema": null

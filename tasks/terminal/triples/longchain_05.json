@@ -27,7 +27,7 @@
     "stdout": "./a.txt\n./b.txt\n./demo/src/a_copy.txt",
     "stderr": "",
     "exit_code": 0,
-    "cwd": "/tmp/tmp.w0BRrYTkcf/lab",
+    "cwd": "/tmp/tmp.ClZ2QL9jos/lab",
     "fs_delta": []
   },
   "format_schema": null

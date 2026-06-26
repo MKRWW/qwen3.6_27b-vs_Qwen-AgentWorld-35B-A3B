@@ -170,10 +170,15 @@ class OpenRouterClient:
         self.timeout = timeout
         self.max_retries = max_retries
 
+    # Klassenweite Drossel: min. Abstand zwischen OpenRouter-Calls (gegen 429).
+    _last_call_t = 0.0
+    THROTTLE_S = 1.2
+
     def chat(self, messages: list[dict], *, max_tokens: int,
              enable_thinking: bool | None = None, **_ignored) -> dict:
         import json as _json
         import time as _time
+        import urllib.error as _ue
         import urllib.request as _u
         sp = dict(self.regime.params)
         payload: dict[str, Any] = {"model": self.model.model_id, "messages": messages,
@@ -186,6 +191,11 @@ class OpenRouterClient:
                    "Content-Type": "application/json"}
         last_err = None
         for attempt in range(1, self.max_retries + 1):
+            # Throttle: globalen Mindestabstand einhalten
+            wait = OpenRouterClient.THROTTLE_S - (_time.monotonic() - OpenRouterClient._last_call_t)
+            if wait > 0:
+                _time.sleep(wait)
+            OpenRouterClient._last_call_t = _time.monotonic()
             t0 = _time.monotonic()
             try:
                 req = _u.Request(f"{self.model.endpoint}/chat/completions",
@@ -197,7 +207,17 @@ class OpenRouterClient:
                 last_err = e
                 self._log(payload, None, _time.monotonic() - t0, attempt, repr(e))
                 if attempt < self.max_retries:
-                    _time.sleep(min(2 ** attempt, 8))
+                    # 429 (Rate-Limit) -> deutlich laenger warten; Retry-After respektieren
+                    is_429 = isinstance(e, _ue.HTTPError) and e.code == 429
+                    if is_429:
+                        ra = e.headers.get("Retry-After") if e.headers else None
+                        try:
+                            delay = float(ra) if ra else 0
+                        except Exception:
+                            delay = 0
+                        _time.sleep(max(delay, 8 * attempt))  # 8,16,24,...s
+                    else:
+                        _time.sleep(min(2 ** attempt, 8))
         raise RuntimeError(f"OpenRouter chat() nach {self.max_retries} Versuchen: {last_err}")
 
     def _log(self, request, response, latency_s, attempt, error):

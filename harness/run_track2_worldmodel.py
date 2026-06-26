@@ -141,33 +141,39 @@ def main():
 
         with rec:
             for t in triples:
-                # Fehlertolerant: ein Triple-Fehler (Timeout etc.) killt nicht den Lauf.
+                # 1) Vorhersage (gratis, eigene Infra). Schlaegt sie fehl -> Triple weg.
                 try:
                     prediction, _ = predict(cli, t, max_tok)
-                    is_empty = not prediction.strip()
-                    fact = G.score_factuality(prediction, t["truth"])
-                    fmt = G.score_format(prediction, t.get("format_schema"))
-                    # WICHTIG: leere Vorhersage NICHT judgen (Judge halluziniert sonst
-                    # "matches exactly") -> hart 0. Empty-Rate ist eigene Metrik.
-                    if judge_cli is None:
-                        jdg = None
-                    elif is_empty:
+                except Exception as e:  # noqa: BLE001
+                    rec.log_result(triple_id=t["_id"], domain=t.get("domain"),
+                                   error=f"predict: {e!r}")
+                    print(f"  [{model_key}] {t['_id']}: PREDICT-FEHLER -> {e!r}")
+                    continue
+                is_empty = not prediction.strip()
+                fact = G.score_factuality(prediction, t["truth"])
+                fmt = G.score_format(prediction, t.get("format_schema"))
+                # 2) Judge ISOLIERT: ein Judge-Infra-Fehler (429) verwirft NIE die
+                #    Vorhersage und zaehlt NICHT als 0 (nicht Schuld des Modells) ->
+                #    judge=None + judge_error. Leere Vorhersage = 0 (Modell-Versagen).
+                jdg, jerr = None, None
+                if judge_cli is not None:
+                    if is_empty:
                         jdg = {**{d: 0.0 for d in G.JUDGE_DIMS}, "reason": "leere Vorhersage"}
                     else:
-                        jdg = judge(judge_cli, t, prediction, 512)
-                    rec.log_result(
-                        triple_id=t["_id"], domain=t.get("domain"),
-                        prediction=prediction, empty=is_empty,
-                        factuality=fact, format=fmt, judge=jdg,
-                        judge_model=eff_judge_key,
-                    )
-                    print(f"  [{model_key}] {t['_id']}: fact={fact['factuality']} "
-                          f"fmt={fmt['format']}{' EMPTY' if is_empty else ''}"
-                          + (f" judge={jdg}" if jdg and not is_empty else ""))
-                except Exception as e:  # noqa: BLE001 - bench: log & continue
-                    rec.log_result(triple_id=t["_id"], domain=t.get("domain"),
-                                   error=repr(e))
-                    print(f"  [{model_key}] {t['_id']}: FEHLER -> {e!r} (uebersprungen)")
+                        try:
+                            jdg = judge(judge_cli, t, prediction, 512)
+                        except Exception as e:  # noqa: BLE001
+                            jerr = repr(e)
+                rec.log_result(
+                    triple_id=t["_id"], domain=t.get("domain"),
+                    prediction=prediction, empty=is_empty,
+                    factuality=fact, format=fmt, judge=jdg,
+                    judge_error=jerr, judge_model=eff_judge_key,
+                )
+                tag = " EMPTY" if is_empty else (" JUDGE-FEHLT" if jerr else "")
+                print(f"  [{model_key}] {t['_id']}: fact={fact['factuality']} "
+                      f"fmt={fmt['format']}{tag}"
+                      + (f" judge={jdg}" if jdg and not is_empty else ""))
         print(f"  -> {rec.path}")
 
 
