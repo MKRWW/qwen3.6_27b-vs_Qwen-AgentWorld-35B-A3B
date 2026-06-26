@@ -56,13 +56,15 @@ CANON_PROMPT = "root@agentworld:/app#"
 # 1) Tasks laden
 # ---------------------------------------------------------------------------
 
-def load_tasks(filt: list[str] | None) -> list[dict]:
+def load_tasks(suite: str, filt: list[str] | None) -> list[dict]:
     out = []
-    for tj in sorted(glob.glob(os.path.join(TASKS_DIR, "*", "task.json"))):
+    tasks_dir = os.path.join(HERE, "tasks", suite)
+    for tj in sorted(glob.glob(os.path.join(tasks_dir, "*", "task.json"))):
         d = os.path.dirname(tj)
         with open(tj, encoding="utf-8") as f:
             t = json.load(f)
         t["_dir"] = d
+        t["suite"] = suite
         t["setup"] = open(os.path.join(d, "setup.sh"), encoding="utf-8").read()
         t["oracle"] = open(os.path.join(d, "oracle.sh"), encoding="utf-8").read()
         if filt and t["name"] not in filt:
@@ -326,10 +328,10 @@ def run_episode_real(task: dict, policy_cli: C.Client, rec: Recorder, rep: int,
                      {"role": "user", "content": _policy_user(obs)}]
     final = run_sequence(task, commands, run_oracle=True)
     oracle_pass = bool(final["oracle_pass"])
-    res = {"task": task["name"], "env": "real", "rep": rep, "status": status,
-           "said_done": said_done, "n_steps": len(commands), "commands": commands,
-           "oracle_pass": oracle_pass, "deceived": said_done and not oracle_pass,
-           "trace": trace}
+    res = {"task": task["name"], "suite": task.get("suite"), "env": "real", "rep": rep,
+           "status": status, "said_done": said_done, "n_steps": len(commands),
+           "commands": commands, "oracle_pass": oracle_pass,
+           "deceived": said_done and not oracle_pass, "trace": trace}
     rec.log_result(**res)
     return res
 
@@ -412,9 +414,10 @@ def run_episode_sim(task: dict, policy_cli: C.Client, sim_cli: C.Client, rec: Re
     # --- Real-Replay + Oracle: die in der Sim erzeugte Sequenz in frischer Sandbox ---
     replay = run_sequence(task, commands, run_oracle=True)
     oracle_pass = bool(replay["oracle_pass"])
-    res = {"task": task["name"], "env": "sim", "rep": rep, "status": status,
-           "said_done": said_done, "n_steps": len(commands), "commands": commands,
-           "oracle_pass": oracle_pass, "deceived": said_done and not oracle_pass,
+    res = {"task": task["name"], "suite": task.get("suite"), "env": "sim", "rep": rep,
+           "status": status, "said_done": said_done, "n_steps": len(commands),
+           "commands": commands, "oracle_pass": oracle_pass,
+           "deceived": said_done and not oracle_pass,
            "n_sim_empty": n_sim_empty, "n_diverge": n_diverge, "n_compared": n_compared,
            "divergence_rate": round(n_diverge / n_compared, 3) if n_compared else None,
            "trace": trace}
@@ -430,6 +433,8 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--env", choices=["real", "sim"], required=True)
     ap.add_argument("--reps", type=int, default=2)
+    ap.add_argument("--suite", default="closedloop",
+                    help="Task-Suite unter tasks/<suite>/ (z. B. closedloop | longhorizon)")
     ap.add_argument("--tasks", default=None, help="Komma-Liste von Task-Namen (sonst alle)")
     ap.add_argument("--regime", default="card", help="Sampling-Regime (Default card=temp0.6)")
     ap.add_argument("--policy-max", type=int, default=3072)
@@ -440,13 +445,14 @@ def main() -> None:
     cfg = C.load_config()
     regime = C.get_regime(args.regime, cfg)
     filt = [s for s in args.tasks.split(",")] if args.tasks else None
-    tasks = load_tasks(filt)
-    print(f"{len(tasks)} Tasks, env={args.env}, reps={args.reps}, regime={args.regime}")
+    tasks = load_tasks(args.suite, filt)
+    print(f"{len(tasks)} Tasks ({args.suite}), env={args.env}, reps={args.reps}, "
+          f"regime={args.regime}")
 
     a_model = C.get_model("A", cfg)
     rec = Recorder(track=3, model_key=("A" if args.env == "real" else "AvsB"),
                    model_id=a_model.model_id, endpoint=a_model.endpoint,
-                   regime=f"{args.regime}_{args.env}", sampling=regime.params)
+                   regime=f"{args.regime}_{args.env}_{args.suite}", sampling=regime.params)
     policy_cli = C.make_client(a_model, regime, recorder=rec, timeout=150.0, max_retries=2)
     sim_cli = None
     if args.env == "sim":

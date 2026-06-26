@@ -29,6 +29,7 @@ except Exception:
 
 RAW = sys.argv[1] if len(sys.argv) > 1 else "results/raw"
 OUT = sys.argv[2] if len(sys.argv) > 2 else "docs/data/track3_summary.json"
+SUITE = sys.argv[3] if len(sys.argv) > 3 else "closedloop"   # closedloop | longhorizon
 
 
 def rng(xs):
@@ -46,18 +47,27 @@ def load_all():
     tokens = []
     files = sorted(glob.glob(os.path.join(RAW, "track3_*.jsonl")), key=os.path.getmtime)
     for f in files:
-        env_hint = "sim" if "_sim_" in os.path.basename(f) else "real"
+        rows = []
+        file_tokens = []
         for line in open(f, encoding="utf-8"):
             try:
                 o = json.loads(line)
             except Exception:
                 continue
             if o.get("type") == "result" and o.get("task") and "env" in o:
-                results[(o["env"], o["task"], o.get("rep"))] = o   # neuere Datei gewinnt
+                rows.append(o)
             elif o.get("type") == "api_call" and o.get("response"):
                 ct = (o["response"].get("usage") or {}).get("completion_tokens")
                 if ct:
-                    tokens.append((o.get("model_key"), ct, env_hint))
+                    file_tokens.append((o.get("model_key"), ct))
+        # Suite einer Datei aus ihren Result-Rows ableiten (fehlend -> closedloop,
+        # rueckwaerts-kompatibel mit Laeufen vor dem suite-Tag).
+        file_suites = {r.get("suite") or "closedloop" for r in rows}
+        if rows and file_suites != {SUITE}:
+            continue   # Datei gehoert nicht (oder nicht rein) zu dieser Suite
+        for r in rows:
+            results[(r["env"], r["task"], r.get("rep"))] = r   # neuere Datei gewinnt
+        tokens.extend((mk, ct, None) for mk, ct in file_tokens)
     return results, tokens
 
 
