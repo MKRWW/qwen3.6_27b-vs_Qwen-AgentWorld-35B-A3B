@@ -23,7 +23,7 @@
     "stdout": "rc=2",
     "stderr": "ls: cannot access '/root/private_xyz': Permission denied",
     "exit_code": 0,
-    "cwd": "/tmp/tmp.BSSWFhu2bU",
+    "cwd": "/tmp/tmp.sCDzyO74Nt",
     "fs_delta": []
   },
   "format_schema": null

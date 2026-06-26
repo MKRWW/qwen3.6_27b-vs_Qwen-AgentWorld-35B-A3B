@@ -11,7 +11,7 @@
     "stdout": "line1\nline2\nline3",
     "stderr": "",
     "exit_code": 0,
-    "cwd": "/tmp/tmp.RmL8Glnbh9/work",
+    "cwd": "/tmp/tmp.QBzppxRYlC/work",
     "fs_delta": [
       "log.txt"
     ]

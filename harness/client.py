@@ -14,6 +14,12 @@ from typing import Any
 import yaml
 from openai import OpenAI
 
+# Norton AV injiziert SSLKEYLOGFILE mit einem Pfad auf sein Filter-Device
+# (\\.\nllMonFltProxy\...), den Python nicht oeffnen kann -> intermittenter
+# PermissionError beim SSL-Context-Aufbau (httpx/ssl). Entfernen = Fix.
+# (Gleiche Norton-HTTPS-Scanning-Ursache wie der OpenRouter-SSL-Workaround.)
+os.environ.pop("SSLKEYLOGFILE", None)
+
 CONFIG_PATH = os.path.join(os.path.dirname(__file__), "..", "config", "models.yaml")
 
 

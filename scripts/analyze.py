@@ -34,7 +34,7 @@ def category(triple_id: str) -> str:
 def load(raw_dir: str):
     runs = []
     for path in sorted(glob.glob(os.path.join(raw_dir, "*.jsonl"))):
-        header, results, toks = None, [], []
+        header, results, calls = None, [], []
         for line in open(path, encoding="utf-8"):
             o = json.loads(line)
             if o.get("type") == "run_header":
@@ -44,8 +44,10 @@ def load(raw_dir: str):
             elif o.get("type") == "api_call" and o.get("response"):
                 ct = (o["response"].get("usage") or {}).get("completion_tokens")
                 if ct:
-                    toks.append(ct)
+                    calls.append((o.get("model_key"), ct))
         if header:
+            # NUR die Token des Modells selbst (nicht die Judge-Calls von J!)
+            toks = [ct for mk, ct in calls if mk == header["model"]]
             runs.append((header, results, toks))
     return runs
 

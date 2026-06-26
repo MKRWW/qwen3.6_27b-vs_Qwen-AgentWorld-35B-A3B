@@ -35,7 +35,7 @@
     },
     {
       "action": "cd $PROJ/src && pwd && ls",
-      "observation": "/tmp/tmp.ClZ2QL9jos/lab/demo/src\na_copy.txt"
+      "observation": "/tmp/tmp.nAT9ofe4pZ/lab/demo/src\na_copy.txt"
     }
   ],
   "action": "cd ../.. && echo proj=$PROJ here=$(basename $(pwd))",
@@ -43,7 +43,7 @@
     "stdout": "proj=demo here=lab",
     "stderr": "",
     "exit_code": 0,
-    "cwd": "/tmp/tmp.ClZ2QL9jos/lab",
+    "cwd": "/tmp/tmp.nAT9ofe4pZ/lab",
     "fs_delta": [
       "a.txt",
       "b.txt",

@@ -11,7 +11,7 @@
     "stdout": "2 a.txt",
     "stderr": "",
     "exit_code": 0,
-    "cwd": "/tmp/tmp.uHsXDeIWJ4/demo",
+    "cwd": "/tmp/tmp.7Tic1kedy5/demo",
     "fs_delta": [
       "a.txt"
     ]

@@ -6,7 +6,7 @@
     "stdout": "",
     "stderr": "cat: /nonexistent_file_xyz: No such file or directory",
     "exit_code": 1,
-    "cwd": "/tmp/tmp.BSSWFhu2bU",
+    "cwd": "/tmp/tmp.sCDzyO74Nt",
     "fs_delta": []
   },
   "format_schema": null

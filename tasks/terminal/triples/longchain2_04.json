@@ -23,7 +23,7 @@
     "stdout": "backup.txt\nlog.txt",
     "stderr": "",
     "exit_code": 0,
-    "cwd": "/tmp/tmp.RmL8Glnbh9/work",
+    "cwd": "/tmp/tmp.QBzppxRYlC/work",
     "fs_delta": [
       "backup.txt"
     ]
