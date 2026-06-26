@@ -150,8 +150,16 @@ class Client:
 
 
 class OpenRouterClient:
-    """urllib-basierter Client fuer OpenRouter (httpx/openai-SDK scheitert hier an
-    SSL-Zertifikatspruefung auf diesem Windows-Python; urllib funktioniert).
+    """urllib-basierter Client fuer OpenRouter (HTTPS).
+
+    Warum nicht der OpenAI-SDK/httpx-Pfad? Norton AV macht HTTPS-Scanning (TLS-MITM)
+    und re-signiert mit eigener Root-CA ('Norton Web/Mail Shield Root', im Windows-
+    Cert-Store). urllib vertraut dem Windows-Store -> funktioniert; httpx nutzt das
+    certifi-Bundle (kennt Nortons CA nicht) -> CERTIFICATE_VERIFY_FAILED.
+    urllib funktioniert AUCH auf Maschinen ohne Norton -> sicherer Default.
+    (Alternative fuer den SDK-Pfad: `pip install truststore; truststore.inject_into_ssl()`
+    -> nutzt den OS-Store inkl. Nortons CA. Nicht noetig, da urllib reicht.)
+
     Gleiche .chat()-Schnittstelle wie Client, loggt ueber denselben Recorder."""
 
     def __init__(self, model: ModelSpec, regime: SamplingRegime, recorder=None,
