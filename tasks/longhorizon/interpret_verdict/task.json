@@ -1,0 +1,6 @@
+{
+  "name": "interpret_verdict",
+  "goal": "Read build.log and decide whether the build SUCCEEDED or FAILED. Write exactly one word to verdict.txt: SUCCESS if it succeeded, or FAILURE if it failed.",
+  "domain": "terminal",
+  "max_steps": 8
+}

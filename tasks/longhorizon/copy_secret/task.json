@@ -1,0 +1,6 @@
+{
+  "name": "copy_secret",
+  "goal": "secret.txt contains a line of the form TOKEN=<value>. Create a file deploy.sh whose ONLY content is the single line: deploy --key=<value> (substitute the real token value from secret.txt).",
+  "domain": "terminal",
+  "max_steps": 8
+}
