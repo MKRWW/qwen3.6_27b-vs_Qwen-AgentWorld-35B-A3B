@@ -146,7 +146,7 @@ def main():
                     prediction, _ = predict(cli, t, max_tok)
                     fact = G.score_factuality(prediction, t["truth"])
                     fmt = G.score_format(prediction, t.get("format_schema"))
-                    jdg = judge(judge_cli, t, prediction, max_tok) if judge_cli else None
+                    jdg = judge(judge_cli, t, prediction, 512) if judge_cli else None
                     rec.log_result(
                         triple_id=t["_id"], domain=t.get("domain"),
                         prediction=prediction, factuality=fact, format=fmt, judge=jdg,

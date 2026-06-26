@@ -59,7 +59,8 @@ sampling_regimes:
 
 max_tokens:
   track1_policy: 2048
-  track2_worldmodel: 32768  # Card-Empfehlung; B's Thinking braucht real ~9-11k -> 8192 truncated
+  track2_worldmodel: 16384  # B braucht real bis ~11k (Thinking) -> 16k = Headroom, aber
+                            # halbe Generierungszeit ggue. 32k bei Runaway-Faellen. 8192 truncated.
 
 judge:
   # Self-Judging vermeiden: B wird nie von B gejudged.
