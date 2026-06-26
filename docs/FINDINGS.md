@@ -37,13 +37,28 @@ B-Judge nicht).
 | `head -2 /etc/os-release` | PRETTY_NAME zuerst (korrekt) | NAME (falsche Zeile) | **A** |
 | python-Version / whoami / nproc / hostname | identisch / beide plausibel | dito | Gleichstand |
 
-**Neutrale Bilanz: B 3 : A 1 : 3 Gleichstand** bei pre-existing, **plus** B gewinnt den
-tiefen Multi-Turn-Fall. → Erster belastbarer **Vorteil für AgentWorld** auf seiner
-Kern-Kompetenz (plausible Umgebungs-Simulation, langes State-Tracking).
+**Neutrale Bilanz (Claude, manuell): B 3 : A 1 : 3 Gleichstand** bei pre-existing, **plus**
+B gewinnt den tiefen Multi-Turn-Fall.
 
-> Mess-Lehre: Cross-Judging ist für A-vs-B **ungeeignet** (unkalibrierte Judges).
-> Fairer Vergleich braucht **einen** Judge für beide — hier Claude; reproduzierbar
-> wäre ein fixer neutraler Judge-Endpoint.
+### Bestätigt durch neutralen DRITTEN Judge (reproduzierbar im Code)
+mistral-small-24b @ OpenRouter als *fixer* Judge für beide (Modell J), validiert: wendet
+die pre-existing-Plausibilitätsregel an, wo gpt-4o-mini scheiterte. Auf denselben 18
+Triples:
+
+| Judge J (gleiche Brille beide) | A (Qwen3.6-27b) | B (AgentWorld) |
+|--------------------------------|----------------|----------------|
+| **Factuality** | **62.8** | **79.4** |
+| Realism | 93.3 | 99.4 |
+| Consistency / Quality | 100 / 100 | 100 / 100 |
+
+→ Der neutrale Judge **bestätigt** die Richtung: B vorn (Factuality 79 vs 63), getrieben
+von longchain_09 (cwd korrekt vs A falsch), preexisting_06 (Listing näher), preexisting_02
+(git-Version exakt). Konsistent mit manueller Claude-Bewertung UND dem Recall-Hint.
+
+> Mess-Lehre: Cross-Judging A↔B ist **ungeeignet** (unkalibriert). Ein **fixer
+> neutraler Judge** (Modell J, `harness/rejudge.py`) macht A vs B vergleichbar — und
+> re-judged bestehende Vorhersagen ohne teure Re-Predictions (~$0.003/Lauf).
+> Vorbehalt: Judge J ist nicht perfekt (Versionsbehandlung schwankt) — N=18, ein Lauf.
 
 ## Track 2 — World-Model-Fidelity (26 harte Terminal-Triples, offizielles Setup)
 

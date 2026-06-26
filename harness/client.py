@@ -149,6 +149,68 @@ class Client:
         )
 
 
+class OpenRouterClient:
+    """urllib-basierter Client fuer OpenRouter (httpx/openai-SDK scheitert hier an
+    SSL-Zertifikatspruefung auf diesem Windows-Python; urllib funktioniert).
+    Gleiche .chat()-Schnittstelle wie Client, loggt ueber denselben Recorder."""
+
+    def __init__(self, model: ModelSpec, regime: SamplingRegime, recorder=None,
+                 timeout: float = 120.0, max_retries: int = 3):
+        self.model = model
+        self.regime = regime
+        self.recorder = recorder
+        self.timeout = timeout
+        self.max_retries = max_retries
+
+    def chat(self, messages: list[dict], *, max_tokens: int,
+             enable_thinking: bool | None = None, **_ignored) -> dict:
+        import json as _json
+        import time as _time
+        import urllib.request as _u
+        sp = dict(self.regime.params)
+        payload: dict[str, Any] = {"model": self.model.model_id, "messages": messages,
+                                   "max_tokens": max_tokens}
+        for k in ("temperature", "top_p"):
+            if k in sp:
+                payload[k] = sp[k]
+        body = _json.dumps(payload).encode()
+        headers = {"Authorization": f"Bearer {self.model.api_key}",
+                   "Content-Type": "application/json"}
+        last_err = None
+        for attempt in range(1, self.max_retries + 1):
+            t0 = _time.monotonic()
+            try:
+                req = _u.Request(f"{self.model.endpoint}/chat/completions",
+                                 data=body, headers=headers)
+                data = _json.load(_u.urlopen(req, timeout=self.timeout))
+                self._log(payload, data, _time.monotonic() - t0, attempt, None)
+                return data
+            except Exception as e:  # noqa: BLE001
+                last_err = e
+                self._log(payload, None, _time.monotonic() - t0, attempt, repr(e))
+                if attempt < self.max_retries:
+                    _time.sleep(min(2 ** attempt, 8))
+        raise RuntimeError(f"OpenRouter chat() nach {self.max_retries} Versuchen: {last_err}")
+
+    def _log(self, request, response, latency_s, attempt, error):
+        if self.recorder is None:
+            return
+        self.recorder.log_call(
+            model_key=self.model.key, model_id=self.model.model_id,
+            endpoint=self.model.endpoint, regime=self.regime.name,
+            request=request, response=response, latency_s=latency_s,
+            attempt=attempt, error=error)
+
+
+def make_client(model: ModelSpec, regime: SamplingRegime, recorder=None,
+                timeout: float = 120.0, max_retries: int = 3):
+    """Richtigen Client je Endpoint waehlen: OpenRouter (HTTPS, urllib) vs lokal/vast
+    (HTTP, OpenAI-SDK)."""
+    if "openrouter.ai" in model.endpoint:
+        return OpenRouterClient(model, regime, recorder, timeout, max_retries)
+    return Client(model, regime, recorder, timeout, max_retries)
+
+
 def first_text(response: dict) -> str:
     """content extrahieren; reasoning_content getrennt behandeln (leerer content = Flag)."""
     try:

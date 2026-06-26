@@ -18,6 +18,18 @@ models:
     quant: nvfp4
     notes: vast.ai (1x RTX PRO 5000), MoE 35B/3B-aktiv, Tool-Parser AKTIV (verifiziert), max_model_len=32000
 
+  J:
+    name: mistral-small-24b @ OpenRouter (neutraler Judge)
+    endpoint: https://openrouter.ai/api/v1
+    model_id: mistralai/mistral-small-24b-instruct-2501
+    api_key_env: OPENROUTER_API_KEY
+    quant: hosted
+    notes: >-
+      Neutraler DRITTER Judge (weder A noch B). Validiert: wendet die pre-existing-
+      Plausibilitaetsregel korrekt an (Version-Mismatch=90), wo gpt-4o-mini scheiterte
+      (=0). Imperfekt bei manchen Listing-Faellen -> Judge-Scores mit Vorbehalt.
+      Guenstig (~$0.05/$0.08 pro Mio tok). NUR fuer Judging nutzen (kostet echtes Geld).
+
 # Fairness-Cap: B serviert nur 32k Kontext, A 262k -> beide Prompts auf 32k begrenzen.
 context_cap_tokens: 32000
 

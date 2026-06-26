@@ -130,12 +130,12 @@ def main():
                        endpoint=model.endpoint, regime=regime.name, sampling=regime.params)
         # Timeout grosszuegig: Thinking AN + 32k-Budget -> einzelne Calls koennen
         # >120s dauern (v.a. B remote, oder unter Last). 300s + nur 2 Retries.
-        cli = C.Client(model, regime, recorder=rec, timeout=300.0, max_retries=2)
+        cli = C.make_client(model, regime, recorder=rec, timeout=300.0, max_retries=2)
         judge_cli = None
         if eff_judge_key:
             judge_model = C.get_model(eff_judge_key, cfg)
-            judge_cli = C.Client(judge_model, C.get_regime("greedy", cfg),
-                                 recorder=rec, timeout=300.0, max_retries=2)
+            judge_cli = C.make_client(judge_model, C.get_regime("greedy", cfg),
+                                      recorder=rec, timeout=120.0, max_retries=3)
         self_flag = " (SELF-JUDGE!)" if eff_judge_key == model_key else ""
         print(f"  Modell {model_key}: Judge = {eff_judge_key or 'KEINER (nur deterministisch)'}{self_flag}")
 
