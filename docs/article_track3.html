@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AgentWorld als Umgebung: was es kann, was es erfindet</title>
+<style>
+  :root{
+    --ink:#1a1f25; --muted:#5b6671; --line:#e5e9ee; --bg:#ffffff; --soft:#f6f8fa;
+    --a:#4C72B0; --b:#DD8452; --b-dark:#B5462F; --ok:#2f855a; --warn:#b7791f;
+    --code-bg:#0f1722; --code-ink:#d7e0ea;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:17px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+  .wrap{max-width:820px;margin:0 auto;padding:0 22px 90px}
+  header.hero{padding:54px 0 26px;border-bottom:1px solid var(--line);margin-bottom:34px}
+  .kicker{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--b-dark);font-weight:700}
+  h1{font-size:38px;line-height:1.15;margin:.35em 0 .25em;letter-spacing:-.01em}
+  .sub{font-size:20px;color:var(--muted);margin:0}
+  .byline{margin-top:18px;font-size:14px;color:var(--muted)}
+  h2{font-size:26px;margin:54px 0 12px;letter-spacing:-.01em;padding-top:8px}
+  h3{font-size:19px;margin:30px 0 8px}
+  p{margin:14px 0}
+  a{color:var(--a)}
+  .lead{font-size:20px;color:#2b333b}
+  blockquote{margin:22px 0;padding:14px 20px;border-left:4px solid var(--b);
+    background:var(--soft);border-radius:0 8px 8px 0;font-size:18px}
+  .tldr{border:1px solid var(--line);border-radius:14px;padding:22px 24px;background:linear-gradient(180deg,#fbfcfd,#f4f7fa)}
+  .tldr h3{margin:0 0 10px;font-size:15px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  .verdict{font-size:21px;font-weight:600;line-height:1.4}
+  figure{margin:30px 0;text-align:center}
+  figure img{max-width:100%;height:auto;border:1px solid var(--line);border-radius:12px}
+  figcaption{font-size:14px;color:var(--muted);margin-top:10px}
+  table{width:100%;border-collapse:collapse;margin:22px 0;font-size:15.5px}
+  th,td{padding:11px 12px;border-bottom:1px solid var(--line);text-align:left}
+  th{font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+  td.num{font-variant-numeric:tabular-nums;font-weight:600}
+  .a{color:var(--a)} .b{color:var(--b-dark)}
+  pre{background:var(--code-bg);color:var(--code-ink);border-radius:12px;padding:18px 20px;
+    overflow:auto;font:13.5px/1.6 "SF Mono",ui-monospace,Menlo,Consolas,monospace;margin:18px 0}
+  pre .c{color:#7d8aa0} pre .k{color:#9fd0ff} pre .s{color:#ffcaa0} pre .g{color:#9be29b} pre .r{color:#ff9b9b}
+  code.inl{background:var(--soft);padding:1px 6px;border-radius:5px;font:14px ui-monospace,Menlo,Consolas,monospace}
+  .file{font-size:12.5px;color:var(--muted);font-family:ui-monospace,Menlo,Consolas,monospace;margin:-12px 0 18px}
+  .box{border-radius:12px;padding:16px 20px;margin:22px 0;border:1px solid}
+  .box h4{margin:0 0 6px;font-size:15px}
+  .bug{background:#fff7ed;border-color:#fed7aa}
+  .bug h4{color:var(--b-dark)}
+  .note{background:#f0f7ff;border-color:#cfe3fb}
+  .gaertner{background:#f3f0ff;border-color:#d9d0fb}
+  .gaertner h4{color:#6b46c1}
+  .caveat{background:#fffbeb;border-color:#fde68a}
+  .caveat h4{color:var(--warn)}
+  ul{margin:14px 0;padding-left:22px} li{margin:6px 0}
+  .toc{font-size:15px;background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:16px 22px}
+  .toc a{text-decoration:none}
+  footer{margin-top:60px;padding-top:22px;border-top:1px solid var(--line);font-size:14px;color:var(--muted)}
+  .pill{display:inline-block;font-size:12px;font-weight:700;padding:2px 9px;border-radius:999px}
+  .pill.ok{background:#e6f4ea;color:var(--ok)} .pill.eq{background:#eef1f5;color:#475569}
+  .pill.bad{background:#fdeaea;color:var(--b-dark)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <div class="kicker">Reality-Check · Teil 2 · Closed-Loop</div>
+  <h1>AgentWorld als Umgebung: was es kann, was es erfindet</h1>
+  <p class="sub">Follow-up zum Reality-Check. Diesmal läuft ein echter Agent im Closed-Loop gegen das World Model statt gegen echte Tools. Plus die Antwort auf einen ziemlich guten Kommentar.</p>
+  <div class="byline">Markus Kremer · Juni 2026 · alle Daten &amp; Code im Branch <code class="inl">track3-closed-loop</code></div>
+</header>
+
+<div class="tldr">
+  <h3>TL;DR</h3>
+  <p class="verdict">Ein World Model als Umgebung trägt genau dann, wenn die Aufgabe nur auf
+  <strong>selbst erzeugtem Zustand</strong> beruht. <span class="b">AgentWorld</span> merkt sich
+  perfekt, was du schreibst (100&nbsp;% exakter Recall über 16 Schritte, Updates inklusive). Sobald der
+  Agent <strong>verborgenen Inhalt</strong> lesen und literal verwenden muss, kippt es: Erfolg fällt von
+  100&nbsp;% auf <strong>25&nbsp;%</strong>, und in jedem vierten Fall glaubt der Agent fälschlich, fertig
+  zu sein. Per-Step-Treue sagt also <strong>nichts</strong> darüber, ob ein Agent eine ganze Aufgabe löst.</p>
+</div>
+
+<p class="lead" style="margin-top:34px">Im ersten Artikel ging es darum, dass AgentWorld ein World Model
+ist und nicht das gehypte Coding-Brain. Ergebnis: gleiche Genauigkeit wie ein generisches Qwen, dafür
+zuverlässiger und rund 9&times; teurer. So weit, so gut. Dann kam ein Kommentar, der genau den richtigen
+Nerv traf.</p>
+
+<blockquote>„AgentWorld ist faktisch eine flexible Mock-API. Die eigentliche Nutzung ist nicht
+&sbquo;Agent löst Tasks&lsquo; und auch nicht nur Single-Step-Vorhersage, sondern: ein echter Agent läuft
+nicht gegen echte Tools, sondern gegen das Modell als Umgebung."</blockquote>
+
+<p>Stimmt. Genau das hatte ich noch nicht getestet. Also habe ich den Rechner eine Nacht durchackern
+lassen und einen dritten Track gebaut. Und weil ein zweiter Kommentar (Danke, Markus Gärtner) noch eine
+sehr konkrete Frage nachschob, gibt es am Ende sogar eine eigene kleine Messung nur dafür.</p>
+
+<div class="toc">
+  <strong>Inhalt:</strong>
+  <a href="#frage">Die Frage</a> ·
+  <a href="#wie">Wie wir das gemessen haben</a> ·
+  <a href="#kurz">Teil 1: kurze Aufgaben</a> ·
+  <a href="#lang">Teil 2: der Brutal-Test</a> ·
+  <a href="#state">Teil 3: Gedächtnis über Zeit</a> ·
+  <a href="#gaertner">Für Markus Gärtner</a> ·
+  <a href="#fazit">Fazit</a> ·
+  <a href="#repro">Selbst nachvollziehen</a>
+</div>
+
+<h2 id="frage">Die Frage</h2>
+<p>Track 2 hat gezeigt: das Modell sagt einen <em>einzelnen</em> Terminal-Schritt zu rund 84 bis 98&nbsp;%
+korrekt voraus. Klingt gut. Aber ein Agent macht ja keinen einzelnen Schritt, sondern eine ganze Kette.
+Und Fehler in einer Kette können sich aufschaukeln (84&nbsp;% hoch N). Die Kernfrage also:</p>
+<p class="lead">Reicht gute Per-Step-Treue, damit ein echter Agent eine <em>ganze</em> Aufgabe löst, wenn die
+Umgebung simuliert ist? Und wie oft wird er dabei getäuscht, glaubt also fertig zu sein, obwohl real
+nichts passiert ist?</p>
+
+<h2 id="wie">Wie wir das gemessen haben</h2>
+<p>Ich habe einen minimalen ReAct-Loop selbst gebaut (kein fremdes Agenten-Framework, damit ich jeden
+Schritt kontrolliere). Die Policy ist Modell A (Qwen3.6-27B), die entscheidet pro Schritt einen
+Shell-Befehl. Das Environment ist austauschbar:</p>
+<pre><span class="c"># harness/run_track3_closedloop.py</span>
+Policy(A) &rarr; CMD &rarr; Environment &rarr; Observation &rarr; zurueck an Policy ... bis DONE
+
+<span class="c"># real: echte WSL-Sandbox, der echte Output ist die Wahrheit (Baseline)</span>
+<span class="c"># sim : AgentWorld(B) sagt jede Observation voraus (offizielles Track-2-Setup),</span>
+<span class="c">#       Closed-Loop -&gt; B konditioniert auf seine EIGENEN frueheren Vorhersagen</span></pre>
+<p class="file">→ harness/run_track3_closedloop.py</p>
+
+<p>Bewertet wird wieder hart und deterministisch, kein LLM-Judge nötig (und damit 0&nbsp;Euro externe
+Kosten). Pro Aufgabe gibt es ein <code class="inl">oracle.sh</code>, das im Endzustand prüft, ob gelöst.
+Drei Sichten:</p>
+<ul>
+  <li><strong>Erfolg real</strong>: löst der Agent es mit echter Umgebung? Das ist die Baseline.</li>
+  <li><strong>Erfolg sim (Real-Replay)</strong>: die Befehlsfolge, die der Agent <em>gegen die Simulation</em>
+  erzeugt hat, wird danach in einer frischen <em>echten</em> Sandbox nachgespielt und geprüft. Hat er also
+  real gelöst, obwohl er die ganze Zeit gegen B lief?</li>
+  <li><strong>Getäuscht</strong>: Agent sagt <code class="inl">DONE</code>, aber der Real-Replay scheitert.</li>
+</ul>
+<p>Dazu messe ich noch die <strong>Divergenz pro Schritt</strong>: ich führe jeden Befehl parallel auch real
+aus und vergleiche, ob B's vorhergesagte Observation mit der echten übereinstimmt. So wird sichtbar, wie
+stark sich die Simulation von der Realität entfernt.</p>
+
+<div class="box note">
+  <h4>Fair zum Modell, gegen die Modellkarte geprüft</h4>
+  <p>B läuft exakt so, wie es die <a href="https://huggingface.co/Qwen/Qwen-AgentWorld-35B-A3B">Modellkarte</a>
+  vorgibt: offizieller Terminal-System-Prompt, Thinking an, Sampling temp 0.6 / top_p 0.95 / top_k 20,
+  Format <code class="inl">Action: execute_bash</code>. Beide Bedingungen starten mit demselben echten
+  <code class="inl">ls -la</code> (die Umgebung ist also "initialisiert", B kennt die Dateinamen). Einziger
+  Unterschied zwischen den Läufen: das Environment. Sonst nichts.</p>
+</div>
+
+<h2 id="kurz">Teil 1: kurze Aufgaben (8 Stück)</h2>
+<p>Erst die einfachen Sachen: Datei anlegen, Zeilen zählen, umbenennen, eine Zeile anhängen, sortieren und
+deduplizieren. Alles in 1 bis 3 Schritten lösbar, deterministisch, relative Pfade. 2 Replikate je Bedingung.</p>
+<p>Und hier die erste Überraschung: <strong>der Agent löst in der Simulation genau so viel wie real, 100&nbsp;%</strong>.
+Null Täuschungen. Und das, obwohl rund <strong>30&nbsp;% der Schritte</strong> divergieren, B also bei fast jedem
+dritten Schritt etwas anderes voraussagt als die Realität.</p>
+<p>Warum geht das trotzdem gut? Weil ein guter Agent <strong>umgebungs-agnostische</strong> Befehle schreibt.
+<code class="inl">awk 'END{print NR}'</code> oder <code class="inl">sort -u</code> funktionieren real, egal was B
+sich als Zwischenausgabe ausdenkt. Wichtig: das ist ein Verdienst der <em>Policy</em>, nicht des Simulators. Die
+naive "84&nbsp;% hoch N kollabiert"-Rechnung stimmt hier einfach nicht, weil die Schritte gar nicht kausal
+voneinander abhängen.</p>
+
+<h2 id="lang">Teil 2: der Brutal-Test</h2>
+<p>Also habe ich (auf Anregung aus den Kommentaren) Aufgaben gebaut, die dem Agenten diesen Ausweg nehmen.
+6 Langhorizont-Tasks, die ihn <strong>zwingen</strong>, den simulierten Inhalt zu lesen und literal darauf zu
+entscheiden: ein Verdikt aus einem Log ableiten, einen Token transkribieren, eine 7-Hop-Kette von Datei zu
+Datei verfolgen, in einer Verifikations-Schleife auf ein Erfolgssignal warten, aus 5 Werten das Maximum
+finden, abhängig von einem Status die richtige Datei schreiben.</p>
+
+<figure>
+  <img src="charts/track3_compare.png" alt="Kurz vs lang: sim-Erfolg, Getaeuscht-Rate, Divergenz">
+  <figcaption>Gleiche Policy, gleiches Setup, gleiche Baseline (real 100&nbsp;%). Nur der Aufgaben-Typ ändert
+  sich. Fehlerbalken = Spannweite über die 2 Replikate.</figcaption>
+</figure>
+
+<table>
+  <tr><th>Metrik</th><th>kurz (agnostisch lösbar)</th><th>lang (Inhalt erzwungen)</th><th></th></tr>
+  <tr><td>Erfolg A @ real (Baseline)</td><td class="num">100&nbsp;%</td><td class="num">100&nbsp;%</td><td><span class="pill eq">gleich</span></td></tr>
+  <tr><td>Erfolg A @ sim (Real-Replay)</td><td class="num">100&nbsp;%</td><td class="num b">25&nbsp;% <span style="font-weight:400;color:var(--muted)">(16,7–33,3)</span></td><td><span class="pill bad">Kollaps</span></td></tr>
+  <tr><td>Getäuscht-Rate</td><td class="num">0&nbsp;%</td><td class="num b">25&nbsp;% <span style="font-weight:400;color:var(--muted)">(16,7–33,3)</span></td><td><span class="pill bad">jede 4.</span></td></tr>
+  <tr><td>Divergenz pro Schritt</td><td class="num">30&nbsp;%</td><td class="num b">87&nbsp;% <span style="font-weight:400;color:var(--muted)">(86,4–88,2)</span></td><td><span class="pill bad">stark</span></td></tr>
+</table>
+
+<p>Das ist der Kontrast, um den es geht. Sobald der Inhalt zählt, bricht die Closed-Loop-Nutzung ein. Zwei
+Beispiele aus den echten Trajektorien, beide rückverfolgbar in <code class="inl">results/raw/</code>:</p>
+
+<h3>Beispiel 1: B erfindet einen Hostnamen und täuscht den Agenten</h3>
+<pre><span class="c"># Aufgabe: status lesen, je nachdem Host in ok_hosts ODER alert_hosts schreiben</span>
+[0] cat health.txt     SIM: <span class="r">'health check: ok'</span>      REAL: <span class="g">'status: degraded'</span>
+[1] cat hostname.txt   SIM: <span class="r">'agentworld-12'</span>         REAL: <span class="g">'primary-db-01'</span>
+[2] echo "agentworld-12" &gt; ok_hosts.txt   <span class="c"># Agent glaubt "ok" -&gt; falsche Datei, falscher Host</span>
+[3] DONE                                  <span class="c"># Real-Replay scheitert. Agent merkt es nicht.</span></pre>
+<p>B halluziniert den Status als "ok" (real war "degraded"), der Agent nimmt den falschen Zweig, und obendrauf
+erfindet B einen Hostnamen, der zufällig nach ihm selbst benannt ist. Klassische Täuschung.</p>
+
+<h3>Beispiel 2: B hält die Kette, verliert aber die Nutzlast</h3>
+<pre><span class="c"># Aufgabe: von Datei zu Datei springen, am Ende das Passwort herausschreiben</span>
+[0..5] cat start/blue/.../frost   SIM: <span class="r">'start -&gt; blue' ... 'frost -&gt; grove'</span>   <span class="c"># Kette konsistent</span>
+[6]    cat grove.txt              SIM: <span class="r">'grove -&gt; the final step'</span>
+                                  REAL: <span class="g">'The password is: vortex'</span>
+[7..13] grep/cat/ls ...           <span class="c"># Agent sucht verzweifelt, B liefert nie 'vortex'</span></pre>
+<p>Das ist fast schon beeindruckend: B bleibt über 6 Sprünge strukturell konsistent (formuliert "Open blue.txt"
+brav zu "start -&gt; blue" um). Was es nicht kann: den eigentlichen Inhalt am Endknoten treu wiedergeben, weil
+der nie in seinem Kopf war. Der Agent findet das echte Passwort nie und läuft ins Leere.</p>
+
+<div class="box caveat">
+  <h4>Ein Confound, ehrlich benannt</h4>
+  <p>B lief bei mir mit 32k Kontext (so war die Cloud-Instanz). In den langen Trajektorien ist es 3&times; in die
+  Token-Grenze gelaufen und gab dann nichts mehr aus. Mit den von der Karte empfohlenen 128k+ wäre der Einbruch
+  vermutlich etwas milder. Die Richtung (verborgener Inhalt wird erfunden) bleibt aber, das zeigt der nächste Teil.</p>
+</div>
+
+<h2 id="state">Teil 3: Gedächtnis über die Zeit</h2>
+<p>Markus Gärtner hat in den Kommentaren genau die richtige zweite Frage gestellt: Ist das Modell <em>über die
+Zeit konsistent</em>? Wenn ich in der Kette einmal einen POST gemacht habe, gibt es mir bei einem späteren GET
+den Datensatz zurück? Bildet es jede Änderung verlässlich ab?</p>
+<p>Das wollte ich sauber von "errät es verborgene Inhalte" trennen. Also eine eigene, deterministische Probe
+(ganz ohne wandernden Agenten): Ich schreibe einen Wert, der im Befehl <strong>sichtbar</strong> ist
+(<code class="inl">echo "ALPHA-7Q2" &gt; store.txt</code>), mache 2 bis 16 Störoperationen, und lese ihn dann
+zurück. Ein perfekter Zustands-Buchhalter <em>muss</em> ihn zurückgeben. Plus ein Update-Test: überschreiben,
+dann nochmal lesen, kommt der neue Wert?</p>
+
+<figure>
+  <img src="charts/track3_state_dissociation.png" alt="Zustands-Buchhaltung 100% vs Inhalt-Grounding 0%">
+  <figcaption>Die Dissoziation, die alle Befunde verbindet: B merkt sich, was du schreibst, fast perfekt.
+  Was es nie gesehen hat, erfindet es.</figcaption>
+</figure>
+
+<p>Und hier ist B richtig gut: <strong>20 von 20 GETs exakt korrekt</strong>, über alle Distanzen bis 16 Schritte,
+und <strong>6 von 6 Updates</strong> richtig (es liefert nie den veralteten Wert). Der echte WSL-Replay als
+Sanity-Check: ebenfalls 20 von 20. Das 256k-Fenster, das Gärtner erwähnt, brauchte es dafür nicht mal, 32k reichten
+locker.</p>
+
+<figure>
+  <img src="charts/track3_state_recall.png" alt="Exakter Recall vs Distanz, flach bei 100 Prozent">
+  <figcaption>POST dann GET über wachsende Distanz: konstant 100&nbsp;%. Das Gedächtnis für selbst geschriebenen
+  Zustand bröckelt nicht.</figcaption>
+</figure>
+
+<p>Das ist der eigentliche Aha-Moment des ganzen Tracks. Es sind zwei <em>verschiedene</em> Fähigkeiten, die man
+nicht in einen Topf werfen darf:</p>
+<table>
+  <tr><th>Fähigkeit</th><th>kann B das?</th><th>Beleg</th></tr>
+  <tr><td><strong>Zustands-Buchhaltung</strong><br>merken/updaten, was in der Session geschrieben wurde</td><td><span class="pill ok">ja, 100&nbsp;%</span></td><td>diese Probe, Update inklusive</td></tr>
+  <tr><td><strong>Inhalt-Grounding</strong><br>den Wert vorbestehender, nie gezeigter Daten treffen</td><td><span class="pill bad">nein, ~0&nbsp;%</span></td><td>copy_secret, multi_hop (0 von 4)</td></tr>
+</table>
+
+<div class="box gaertner" id="gaertner">
+  <h4>Kurz an Markus Gärtner</h4>
+  <p>Deine zwei Aspekte haben wir jetzt getrennt gemessen, und dein Instinkt war goldrichtig, nur mit einer
+  scharfen Grenze. <strong>"POST dann GET gibt den Datensatz zurück" funktioniert</strong>, solange der Datensatz
+  aus der Session stammt: 100&nbsp;% exakt über 16 Schritte, Updates verlässlich abgebildet. Genau das, was eine
+  Einsteiger-Übungs-API können müsste, denn Anfänger-Übungen sind fast immer "POST meine Daten, GET meine Daten".
+  Deine Idee, sowas als Spiel-API anzubieten, trägt also für diesen Fall.</p>
+  <p style="margin-bottom:0">Die Grenze ist <strong>vorbestehender oder externer</strong> Zustand: ein GET auf
+  Daten, die das Modell vor der Session nie gesehen hat, liefert eine plausible Erfindung, danach intern
+  konsistent weitergeführt. Im Agenten-Loop wird daraus im schlechtesten Fall eine stille Täuschung (25&nbsp;%).
+  Per-Step-Treue ist deshalb kein Prädiktor für Closed-Loop-Tauglichkeit. Die richtige Frage ist:
+  hängt die Aufgabe an selbst erzeugtem Zustand oder an verborgenem Inhalt? Danke für den Denkanstoß, das war
+  einen eigenen Track wert.</p>
+</div>
+
+<h2 id="fazit">Fazit</h2>
+<p class="lead">AgentWorld als Live-Umgebung für einen Agenten funktioniert dort, wo die Aufgabe nur auf selbst
+erzeugtem Zustand beruht (da ist B sogar zuverlässig), und es kollabiert dort, wo der Erfolg von verborgenem,
+echtem Inhalt abhängt.</p>
+<p>Weder Verriss noch Lobgesang. Es ist die saubere Abgrenzung, wofür ein Terminal-World-Model heute taugt
+(Buchhaltung von selbst erzeugtem Zustand, Plausibilität, Struktur) und wofür eben nicht (ein treuer
+Live-Ersatz für echte Tools mit vorbestehendem Zustand). Und es ist eine kleine Warnung an alle, die
+"Per-Step-Genauigkeit X&nbsp;%" lesen und daraus auf einen funktionierenden Agenten schließen: die zwei Dinge
+haben weniger miteinander zu tun, als man denkt.</p>
+
+<div class="box bug">
+  <h4>Ein Bug, den ich rechtzeitig gefangen habe</h4>
+  <p>Mein erster Divergenz-Vergleich stellte den Anzeige-Platzhalter "(kein Output)" gegen B's leere Ausgabe und
+  zählte jeden Befehl ohne Ausgabe (Redirect, mkdir, mv) als 100&nbsp;% Divergenz. Hätte die wichtigste Zahl des
+  Artikels verfälscht. Im Smoke-Test aufgefallen, bevor der große Lauf startete. Genau dafür macht man Smoke-Tests.</p>
+</div>
+
+<div class="box caveat">
+  <h4>Was diese Zahlen NICHT sagen</h4>
+  <ul style="margin:6px 0">
+    <li><strong>Kleine N:</strong> 8 + 6 Aufgaben, 2 Replikate, eine Domäne (Terminal). Richtungs-Indikator, keine Signifikanz.</li>
+    <li><strong>HTTP/REST nicht getestet:</strong> Gärtners POST/GET-Beispiel ist eine API-Domäne. Wir testen das gleiche Prinzip im Terminal, nicht 1:1 denselben Wrapper.</li>
+    <li><strong>32k statt 128k+ Kontext</strong> bei B (Cloud-Instanz), 3&times; Truncation in langen Läufen.</li>
+    <li><strong>Quant-Confound:</strong> A int4, B NVFP4, unverändert aus Teil 1.</li>
+  </ul>
+</div>
+
+<h2 id="repro">Selbst nachvollziehen</h2>
+<p>Alles liegt im Branch <code class="inl">track3-closed-loop</code>, oracle-basiert und reproduzierbar:</p>
+<pre><span class="c"># kurze + lange Suite (Agent gegen real bzw. sim)</span>
+python harness/run_track3_closedloop.py --env real --suite closedloop  --reps 2
+python harness/run_track3_closedloop.py --env sim  --suite longhorizon --reps 2
+python scripts/report_track3.py results/raw docs/data/track3_longhorizon_summary.json longhorizon
+python scripts/make_charts_track3.py
+
+<span class="c"># State-Consistency-Probe (POST -&gt; GET ueber Distanz + Update)</span>
+python harness/run_state_consistency.py --reps 2
+python scripts/report_state_consistency.py</pre>
+<p>Relevante Dateien: <code class="inl">harness/run_track3_closedloop.py</code> (Loop + WSL-Replay-Executor),
+<code class="inl">harness/run_state_consistency.py</code> (die Gedächtnis-Probe),
+<code class="inl">tasks/closedloop/</code> und <code class="inl">tasks/longhorizon/</code> (die Aufgaben mit
+<code class="inl">oracle.sh</code>), <code class="inl">docs/FINDINGS_TRACK3.md</code> (volle Auswertung mit
+Lab-Notebook).</p>
+
+<footer>
+  <p>Teil 1 lesen: <a href="article.html">„Der neue heiße Scheiß"? Ein Reality-Check</a> ·
+  volle Auswertung: <a href="FINDINGS_TRACK3.md">FINDINGS_TRACK3.md</a> · Plan: <a href="TRACK3_PLAN.md">TRACK3_PLAN.md</a>.</p>
+  <p>Alle Zahlen aus <code class="inl">results/raw/*.jsonl</code> (jeder Request/Response geloggt) →
+  aggregiert in <code class="inl">docs/data/track3_*summary.json</code>. Charts aus denselben Summaries.</p>
+  <p>© 2026 Markus Kremer · Benchmark-Code MIT-Lizenz · Modelle: Apache-2.0.</p>
+</footer>
+
+</div>
+</body>
+</html>
