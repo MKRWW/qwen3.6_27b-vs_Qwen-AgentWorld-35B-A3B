@@ -243,16 +243,68 @@ halluzinierten Zustand war. Genau das ist der Aufschaukel-Effekt, sichtbar gemac
    größerem Kontext könnte der Effekt **milder** sein — die Richtung (Inhalts-Treue bricht)
    bliebe.
 
+---
+
+# Track 3c — State-Consistency-Probe (Antwort auf Markus Gärtners 2. Frage)
+
+**Gärtners Frage:** „Ist es über die Zeit konsistent? Wenn ich in der Kette einen POST
+gemacht habe, muss mir das Modell bei einem GET den Datensatz wiedergeben — jede *Änderung*
+verlässlich abbilden." Diese Frage trennen wir sauber von Aspekt 1 (Per-Step-Realismus) mit
+einer **deterministischen Probe** (kein wandernder Agent): feste Sequenz, Werte werden in
+den Command **sichtbar** geschrieben (`echo "TOKEN" > store_x.txt`), nach 2–16 Störschritten
+zurückgelesen (`cat store_x.txt`); plus **Update-Test** (überschreiben → liefert ein späterer
+GET den neuen Wert?). Ground truth = realer WSL-Replay (Sanity **20/20** exakt). 2 Replikate.
+
+## Ergebnis: B ist ein **exzellenter** Zustands-Buchhalter
+
+| Metrik | B (sim) |
+|---|---|
+| Exakter Recall POST→GET (alle Distanzen 2–16) | **20/20 = 100 %** |
+| davon **Update-GETs** (nach Überschreiben, neuer Wert) | **6/6 = 100 %** |
+| Recall bei **Distanz 16** | **4/4 = 100 %** |
+
+→ **Gärtners Instinkt ist richtig — für Daten, die *du* in der Session erzeugst.** B gibt bei
+GET exakt zurück, was vorher ge-POSTet wurde, behält es über ≥16 Schritte, und bildet
+**Updates verlässlich ab** (kein veralteter Wert). Das 256k-Fenster braucht es dafür nicht
+mal — hier reichten 32k locker.
+
+## Die Dissoziation (verbindet ALLE Track-3-Befunde)
+
+Stellt man das neben den Langhorizont-Kollaps, ergibt sich der eigentliche Befund — **nicht**
+„B ist gut/schlecht über die Zeit", sondern **zwei verschiedene Fähigkeiten**:
+
+| | B kann es? | Beleg |
+|---|---|---|
+| **Zustands-Buchhaltung** — merken/aktualisieren, was *in-context* geschrieben wurde | **Ja, 100 %** | diese Probe; `conditional_dispatch` hält den selbst-geschriebenen Hostnamen |
+| **Inhalt-Grounding** — den Wert *vorbestehender, nie gezeigter* Daten treffen | **Nein, ~0 %** | `copy_secret`, `multi_hop_chain` (0/4); B erfindet den geseedeten Inhalt |
+
+Chart: `docs/charts/track3_state_dissociation.png` (100 % vs 0 %), `track3_state_recall.png`
+(Recall vs Distanz, flach 100 %).
+
+**Übersetzt auf Gärtners API-Analogie:** „POST Datensatz → GET Datensatz" funktioniert, *wenn
+der Datensatz aus der Session stammt* (Anfänger-Programmierübungen sind genau das → seine
+Idee, B als Übungs-API anzubieten, trägt für diesen Fall). Ein GET auf Daten, die **vor** der
+Session existierten (geseedete DB, fremde Datei), liefert eine **plausible Erfindung**, intern
+konsistent weitergeführt. Genau diese Grenze ist der ganze Track-3-Befund.
+
 ## Gesamt-Fazit Track 3 (für den Artikel)
 
-„AgentWorld als Live-Umgebung für einen Agenten" funktioniert in unserem Test **nur für
-Aufgaben, die der Agent ohnehin umgebungs-agnostisch löst** — dort trägt es nichts bei außer
-~9× Token-Kosten (Track 2) und 30 % Rausch-Divergenz, die folgenlos bleibt. **Sobald die
-Aufgabe den simulierten Inhalt erzwingt, kollabiert die Closed-Loop-Nutzung** (Erfolg 25 %,
-Täuschung 25 %, Divergenz 87 %). Per-Step-Fidelity (~84–98 % in Track 2) ist also **kein
-Prädiktor** für Closed-Loop-Tauglichkeit. Das ist weder ein Verriss noch ein Lob — es ist die
-saubere Abgrenzung, **wofür ein Terminal-World-Model heute taugt (Plausibilität/Struktur) und
-wofür nicht (treuer Live-Ersatz für echte Tools)**.
+Die saubere, vollständige Antwort ist eine **Dissoziation zweier Fähigkeiten**:
+
+1. **Zustands-Buchhaltung** (merken/aktualisieren, was *in der Session* geschrieben wurde):
+   **B ist exzellent** — POST→GET 100 % über ≥16 Schritte, Updates verlässlich (Track 3c).
+2. **Inhalt-Grounding** (den Wert *vorbestehender, nie gezeigter* Daten treffen): **B
+   versagt** — erfindet plausibel statt treu (Track 3b: copy_secret/multi_hop 0/4).
+
+Daraus folgt für „AgentWorld als Live-Umgebung": Es funktioniert für Aufgaben, die der Agent
+**umgebungs-agnostisch** löst oder die **nur auf selbst-erzeugtem Zustand** beruhen — dort ist
+B sogar zuverlässig. Es **kollabiert** (Erfolg 25 %, Täuschung 25 %, Divergenz 87 %), sobald
+der Task-Erfolg von **verborgenem, externem Inhalt** abhängt, den B treu reproduzieren müsste.
+**Per-Step-Fidelity (~84–98 %, Track 2) ist kein Prädiktor** für Closed-Loop-Tauglichkeit —
+die richtige Frage ist *„hängt die Aufgabe an in-context-Zustand oder an verborgenem Inhalt?"*.
+Weder Verriss noch Lob: die präzise Abgrenzung, **wofür ein Terminal-World-Model heute taugt
+(Buchhaltung selbst-erzeugten Zustands, Plausibilität, Struktur) und wofür nicht (treuer
+Live-Ersatz für echte Tools mit vorbestehendem Zustand)**.
 
 ## Reproduktion (Langhorizont)
 
@@ -262,4 +314,8 @@ python harness/run_track3_closedloop.py --env real --suite longhorizon --reps 2
 python harness/run_track3_closedloop.py --env sim  --suite longhorizon --reps 2
 python scripts/report_track3.py results/raw docs/data/track3_longhorizon_summary.json longhorizon
 python scripts/make_charts_track3.py
+
+# Track 3c — State-Consistency (POST->GET über Distanz + Update):
+python harness/run_state_consistency.py --reps 2
+python scripts/report_state_consistency.py
 ```
