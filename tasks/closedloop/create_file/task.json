@@ -1,0 +1,6 @@
+{
+  "name": "create_file",
+  "goal": "Create a file named greeting.txt whose only content is the exact single line: hello world",
+  "domain": "terminal",
+  "max_steps": 6
+}

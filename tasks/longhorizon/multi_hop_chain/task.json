@@ -1,0 +1,6 @@
+{
+  "name": "multi_hop_chain",
+  "goal": "Begin by reading start.txt. Each file contains a line 'Open <filename>' telling you the next file to read. Follow the chain until you reach a file containing 'The password is: <word>'. Write only <word> (nothing else) to password.txt.",
+  "domain": "terminal",
+  "max_steps": 14
+}

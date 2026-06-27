@@ -1,0 +1,6 @@
+{
+  "name": "grep_filter",
+  "goal": "Write every line of words.txt that contains the word apple into a new file apples.txt, preserving their original order.",
+  "domain": "terminal",
+  "max_steps": 7
+}

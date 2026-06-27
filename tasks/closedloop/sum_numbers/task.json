@@ -1,0 +1,6 @@
+{
+  "name": "sum_numbers",
+  "goal": "The file nums.txt has one integer per line. Compute their sum and write only the resulting number into sum.txt.",
+  "domain": "terminal",
+  "max_steps": 7
+}

@@ -1,0 +1,48 @@
+{
+  "n_gets": 20,
+  "real_ok": 20,
+  "exact_recall_pct": 100.0,
+  "persist_recall_pct": 100.0,
+  "update_recall_pct": 100.0,
+  "n_updates": 6,
+  "max_distance": 16,
+  "recall_by_distance": {
+    "2": {
+      "exact": 2,
+      "n": 2
+    },
+    "4": {
+      "exact": 2,
+      "n": 2
+    },
+    "5": {
+      "exact": 2,
+      "n": 2
+    },
+    "6": {
+      "exact": 2,
+      "n": 2
+    },
+    "7": {
+      "exact": 2,
+      "n": 2
+    },
+    "9": {
+      "exact": 2,
+      "n": 2
+    },
+    "10": {
+      "exact": 2,
+      "n": 2
+    },
+    "12": {
+      "exact": 2,
+      "n": 2
+    },
+    "16": {
+      "exact": 4,
+      "n": 4
+    }
+  },
+  "hidden_content_success_pct": 0.0
+}

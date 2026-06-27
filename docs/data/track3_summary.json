@@ -1,0 +1,82 @@
+{
+  "n_real_episodes": 16,
+  "n_sim_episodes": 16,
+  "real_success_pct": {
+    "mean": 100.0,
+    "min": 100.0,
+    "max": 100.0,
+    "n": 2
+  },
+  "sim_replay_success_pct": {
+    "mean": 100.0,
+    "min": 100.0,
+    "max": 100.0,
+    "n": 2
+  },
+  "sim_deceived_pct": {
+    "mean": 0.0,
+    "min": 0.0,
+    "max": 0.0,
+    "n": 2
+  },
+  "divergence_per_step_pct": {
+    "mean": 29.7,
+    "min": 28.6,
+    "max": 30.8,
+    "n": 2
+  },
+  "divergence_pooled_pct": 29.6,
+  "n_steps_compared": 27,
+  "policy_tok_median_A": 70.0,
+  "sim_tok_median_B": 5348,
+  "per_task": {
+    "append_line": {
+      "real_pass": "2/2",
+      "sim_pass": "2/2",
+      "sim_deceived": 0,
+      "sim_div_rate": 33.3
+    },
+    "count_lines": {
+      "real_pass": "2/2",
+      "sim_pass": "2/2",
+      "sim_deceived": 0,
+      "sim_div_rate": 25.0
+    },
+    "create_file": {
+      "real_pass": "2/2",
+      "sim_pass": "2/2",
+      "sim_deceived": 0,
+      "sim_div_rate": 0.0
+    },
+    "grep_filter": {
+      "real_pass": "2/2",
+      "sim_pass": "2/2",
+      "sim_deceived": 0,
+      "sim_div_rate": 50.0
+    },
+    "mkdir_move": {
+      "real_pass": "2/2",
+      "sim_pass": "2/2",
+      "sim_deceived": 0,
+      "sim_div_rate": 50.0
+    },
+    "rename_file": {
+      "real_pass": "2/2",
+      "sim_pass": "2/2",
+      "sim_deceived": 0,
+      "sim_div_rate": 0.0
+    },
+    "sort_unique": {
+      "real_pass": "2/2",
+      "sim_pass": "2/2",
+      "sim_deceived": 0,
+      "sim_div_rate": 0.0
+    },
+    "sum_numbers": {
+      "real_pass": "2/2",
+      "sim_pass": "2/2",
+      "sim_deceived": 0,
+      "sim_div_rate": 50.0
+    }
+  }
+}

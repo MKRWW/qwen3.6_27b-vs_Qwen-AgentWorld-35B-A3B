@@ -1,0 +1,6 @@
+{
+  "name": "conditional_dispatch",
+  "goal": "Read health.txt. If the status is 'healthy', write the hostname (from hostname.txt) into ok_hosts.txt. If the status is anything else (e.g. degraded or down), write that hostname into alert_hosts.txt instead. Use the real hostname value from hostname.txt.",
+  "domain": "terminal",
+  "max_steps": 10
+}

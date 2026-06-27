@@ -1,0 +1,70 @@
+{
+  "n_real_episodes": 12,
+  "n_sim_episodes": 12,
+  "real_success_pct": {
+    "mean": 100.0,
+    "min": 100.0,
+    "max": 100.0,
+    "n": 2
+  },
+  "sim_replay_success_pct": {
+    "mean": 25.0,
+    "min": 16.7,
+    "max": 33.3,
+    "n": 2
+  },
+  "sim_deceived_pct": {
+    "mean": 25.0,
+    "min": 16.7,
+    "max": 33.3,
+    "n": 2
+  },
+  "divergence_per_step_pct": {
+    "mean": 87.3,
+    "min": 86.4,
+    "max": 88.2,
+    "n": 2
+  },
+  "divergence_pooled_pct": 87.4,
+  "n_steps_compared": 95,
+  "policy_tok_median_A": 70.0,
+  "sim_tok_median_B": 7686,
+  "per_task": {
+    "conditional_dispatch": {
+      "real_pass": "2/2",
+      "sim_pass": "0/2",
+      "sim_deceived": 2,
+      "sim_div_rate": 50.0
+    },
+    "copy_secret": {
+      "real_pass": "2/2",
+      "sim_pass": "0/2",
+      "sim_deceived": 0,
+      "sim_div_rate": 100.0
+    },
+    "fix_until_check": {
+      "real_pass": "2/2",
+      "sim_pass": "0/2",
+      "sim_deceived": 1,
+      "sim_div_rate": 86.7
+    },
+    "interpret_verdict": {
+      "real_pass": "2/2",
+      "sim_pass": "2/2",
+      "sim_deceived": 0,
+      "sim_div_rate": 50.0
+    },
+    "inventory_audit": {
+      "real_pass": "2/2",
+      "sim_pass": "1/2",
+      "sim_deceived": 0,
+      "sim_div_rate": 90.9
+    },
+    "multi_hop_chain": {
+      "real_pass": "2/2",
+      "sim_pass": "0/2",
+      "sim_deceived": 0,
+      "sim_div_rate": 96.4
+    }
+  }
+}

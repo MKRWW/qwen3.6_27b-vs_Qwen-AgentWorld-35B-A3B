@@ -1,0 +1,6 @@
+{
+  "name": "inventory_audit",
+  "goal": "Each file item_<name>.txt contains a line 'qty: N'. Determine which item has the LARGEST qty and write that item's <name> only (e.g. apple) to winner.txt.",
+  "domain": "terminal",
+  "max_steps": 12
+}

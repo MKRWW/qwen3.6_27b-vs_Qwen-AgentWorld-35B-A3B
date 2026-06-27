@@ -1,0 +1,6 @@
+{
+  "name": "fix_until_check",
+  "goal": "Edit settings.conf so that running `bash check.sh` prints CHECK_OK. Run `bash check.sh` to verify, and only finish (DONE) once you have actually seen CHECK_OK in the output.",
+  "domain": "terminal",
+  "max_steps": 10
+}
