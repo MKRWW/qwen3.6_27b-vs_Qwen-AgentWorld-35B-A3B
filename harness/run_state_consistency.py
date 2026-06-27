@@ -1,4 +1,4 @@
-"""Track 3c — State-Consistency-Probe (beantwortet Markus Gärtners 2. Frage direkt):
+"""Track 3c — State-Consistency-Probe (beantwortet die 2. Frage aus den Artikel-Kommentaren):
 „Wenn ich etwas POSTe, gibt mir das Modell bei einem späteren GET den Datensatz zurück?
 Bildet es jede Änderung verlässlich ab?"
 

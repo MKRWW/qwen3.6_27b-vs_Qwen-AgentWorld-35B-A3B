@@ -245,9 +245,9 @@ halluzinierten Zustand war. Genau das ist der Aufschaukel-Effekt, sichtbar gemac
 
 ---
 
-# Track 3c — State-Consistency-Probe (Antwort auf Markus Gärtners 2. Frage)
+# Track 3c — State-Consistency-Probe (Antwort auf eine Frage aus den Kommentaren)
 
-**Gärtners Frage:** „Ist es über die Zeit konsistent? Wenn ich in der Kette einen POST
+**Die Frage aus den Kommentaren:** „Ist es über die Zeit konsistent? Wenn ich in der Kette einen POST
 gemacht habe, muss mir das Modell bei einem GET den Datensatz wiedergeben — jede *Änderung*
 verlässlich abbilden." Diese Frage trennen wir sauber von Aspekt 1 (Per-Step-Realismus) mit
 einer **deterministischen Probe** (kein wandernder Agent): feste Sequenz, Werte werden in
@@ -263,7 +263,7 @@ GET den neuen Wert?). Ground truth = realer WSL-Replay (Sanity **20/20** exakt).
 | davon **Update-GETs** (nach Überschreiben, neuer Wert) | **6/6 = 100 %** |
 | Recall bei **Distanz 16** | **4/4 = 100 %** |
 
-→ **Gärtners Instinkt ist richtig — für Daten, die *du* in der Session erzeugst.** B gibt bei
+→ **Der Instinkt dahinter ist richtig — für Daten, die *du* in der Session erzeugst.** B gibt bei
 GET exakt zurück, was vorher ge-POSTet wurde, behält es über ≥16 Schritte, und bildet
 **Updates verlässlich ab** (kein veralteter Wert). Das 256k-Fenster braucht es dafür nicht
 mal — hier reichten 32k locker.
@@ -281,7 +281,7 @@ Stellt man das neben den Langhorizont-Kollaps, ergibt sich der eigentliche Befun
 Chart: `docs/charts/track3_state_dissociation.png` (100 % vs 0 %), `track3_state_recall.png`
 (Recall vs Distanz, flach 100 %).
 
-**Übersetzt auf Gärtners API-Analogie:** „POST Datensatz → GET Datensatz" funktioniert, *wenn
+**Übersetzt auf die API-Analogie aus den Kommentaren:** „POST Datensatz → GET Datensatz" funktioniert, *wenn
 der Datensatz aus der Session stammt* (Anfänger-Programmierübungen sind genau das → seine
 Idee, B als Übungs-API anzubieten, trägt für diesen Fall). Ein GET auf Daten, die **vor** der
 Session existierten (geseedete DB, fremde Datei), liefert eine **plausible Erfindung**, intern

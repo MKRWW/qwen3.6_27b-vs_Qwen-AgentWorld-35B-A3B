@@ -47,8 +47,8 @@
   .bug{background:#fff7ed;border-color:#fed7aa}
   .bug h4{color:var(--b-dark)}
   .note{background:#f0f7ff;border-color:#cfe3fb}
-  .gaertner{background:#f3f0ff;border-color:#d9d0fb}
-  .gaertner h4{color:#6b46c1}
+  .kommentar{background:#f3f0ff;border-color:#d9d0fb}
+  .kommentar h4{color:#6b46c1}
   .caveat{background:#fffbeb;border-color:#fde68a}
   .caveat h4{color:var(--warn)}
   ul{margin:14px 0;padding-left:22px} li{margin:6px 0}
@@ -90,8 +90,8 @@ Nerv traf.</p>
 nicht gegen echte Tools, sondern gegen das Modell als Umgebung."</blockquote>
 
 <p>Stimmt. Genau das hatte ich noch nicht getestet. Also habe ich den Rechner eine Nacht durchackern
-lassen und einen dritten Track gebaut. Und weil ein zweiter Kommentar (Danke, Markus Gärtner) noch eine
-sehr konkrete Frage nachschob, gibt es am Ende sogar eine eigene kleine Messung nur dafür.</p>
+lassen und einen dritten Track gebaut. Und weil ein zweiter Kommentar noch eine sehr konkrete Frage
+nachschob, gibt es am Ende sogar eine eigene kleine Messung nur dafür.</p>
 
 <div class="toc">
   <strong>Inhalt:</strong>
@@ -100,7 +100,7 @@ sehr konkrete Frage nachschob, gibt es am Ende sogar eine eigene kleine Messung 
   <a href="#kurz">Teil 1: kurze Aufgaben</a> ·
   <a href="#lang">Teil 2: der Brutal-Test</a> ·
   <a href="#state">Teil 3: Gedächtnis über Zeit</a> ·
-  <a href="#gaertner">Für Markus Gärtner</a> ·
+  <a href="#kommentar">Antwort auf einen Kommentar</a> ·
   <a href="#fazit">Fazit</a> ·
   <a href="#repro">Selbst nachvollziehen</a>
 </div>
@@ -227,7 +227,7 @@ der nie in seinem Kopf war. Der Agent findet das echte Passwort nie und läuft i
 </div>
 
 <h2 id="state">Teil 3: Gedächtnis über die Zeit</h2>
-<p>Markus Gärtner hat in den Kommentaren genau die richtige zweite Frage gestellt: Ist das Modell <em>über die
+<p>Ein Kommentar stellte genau die richtige zweite Frage: Ist das Modell <em>über die
 Zeit konsistent</em>? Wenn ich in der Kette einmal einen POST gemacht habe, gibt es mir bei einem späteren GET
 den Datensatz zurück? Bildet es jede Änderung verlässlich ab?</p>
 <p>Das wollte ich sauber von "errät es verborgene Inhalte" trennen. Also eine eigene, deterministische Probe
@@ -244,7 +244,7 @@ dann nochmal lesen, kommt der neue Wert?</p>
 
 <p>Und hier ist AgentWorld richtig gut: <strong>20 von 20 GETs exakt korrekt</strong>, über alle Distanzen bis 16 Schritte,
 und <strong>6 von 6 Updates</strong> richtig (es liefert nie den veralteten Wert). Der echte WSL-Replay als
-Sanity-Check: ebenfalls 20 von 20. Das 256k-Fenster, das Gärtner erwähnt, brauchte es dafür nicht mal, 32k reichten
+Sanity-Check: ebenfalls 20 von 20. Das 256k-Fenster, das im Kommentar erwähnt wird, brauchte es dafür nicht mal, 32k reichten
 locker.</p>
 
 <figure>
@@ -261,8 +261,8 @@ nicht in einen Topf werfen darf:</p>
   <tr><td><strong>Inhalt-Grounding</strong><br>den Wert vorbestehender, nie gezeigter Daten treffen</td><td><span class="pill bad">nein, ~0&nbsp;%</span></td><td>copy_secret, multi_hop (0 von 4)</td></tr>
 </table>
 
-<div class="box gaertner" id="gaertner">
-  <h4>Kurz an Markus Gärtner</h4>
+<div class="box kommentar" id="kommentar">
+  <h4>Kurz zu diesem Kommentar</h4>
   <p>Deine zwei Aspekte haben wir jetzt getrennt gemessen, und dein Instinkt war goldrichtig, nur mit einer
   scharfen Grenze. <strong>"POST dann GET gibt den Datensatz zurück" funktioniert</strong>, solange der Datensatz
   aus der Session stammt: 100&nbsp;% exakt über 16 Schritte, Updates verlässlich abgebildet. Genau das, was eine
@@ -297,7 +297,7 @@ haben weniger miteinander zu tun, als man denkt.</p>
   <h4>Was diese Zahlen NICHT sagen</h4>
   <ul style="margin:6px 0">
     <li><strong>Kleine N:</strong> 8 + 6 Aufgaben, 2 Replikate, eine Domäne (Terminal). Richtungs-Indikator, keine Signifikanz.</li>
-    <li><strong>HTTP/REST nicht getestet:</strong> Gärtners POST/GET-Beispiel ist eine API-Domäne. Wir testen das gleiche Prinzip im Terminal, nicht 1:1 denselben Wrapper.</li>
+    <li><strong>HTTP/REST nicht getestet:</strong> Das POST/GET-Beispiel aus dem Kommentar ist eine API-Domäne. Wir testen das gleiche Prinzip im Terminal, nicht 1:1 denselben Wrapper.</li>
     <li><strong>32k statt 128k+ Kontext</strong> bei B (Cloud-Instanz), 3&times; Truncation in langen Läufen.</li>
     <li><strong>Quant-Confound:</strong> A int4, B NVFP4, unverändert aus Teil 1.</li>
   </ul>

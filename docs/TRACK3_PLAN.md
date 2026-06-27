@@ -1,6 +1,6 @@
 # Track 3 — Closed-Loop: Agent läuft gegen AgentWorld als Umgebung
 
-**Auslöser:** Kommentar von Markus Gärtner zum Artikel. Kernpunkt (korrekt):
+**Auslöser:** ein Kommentar zum Artikel. Kernpunkt (korrekt):
 AgentWorld ist faktisch eine **flexible Mock-API** für Agenten-Umgebungen. Die
 *eigentliche* Nutzung ist nicht „Agent löst Tasks" (Track 1, falsche Nutzung) und
 auch nicht nur „Single-Step-Vorhersage" (Track 2) — sondern: **ein echter Agent läuft
